@@ -35,7 +35,6 @@ import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -152,8 +151,6 @@ public class ManagerFragment extends Fragment {
         ArrayList<File> dirList = new ArrayList<>();
         ArrayList<File> fileList = new ArrayList<>();
         Comparator<File> comparator;
-        sortWay = 0;
-        searchString = "";
 
         for (int i = 0; i < mFilesInDir.size(); i++) {
             if (mFilesInDir.get(i).isDirectory()) {
@@ -221,7 +218,6 @@ public class ManagerFragment extends Fragment {
         directoryTextView = (TextView) v.findViewById(R.id.directoryTextView);
         longPressed = false;
         cutFile = false;
-        //dialogItems = new String[] {"copy", "paste", "cut", "delete"};
         dialogItems = new String[] {getActivity().getResources().getString(R.string.copy),
                 getActivity().getResources().getString(R.string.paste),
                 getActivity().getResources().getString(R.string.cut),
@@ -253,7 +249,7 @@ public class ManagerFragment extends Fragment {
             public void onClick(View v) {
                 if (!longPressed) {
                     int position = recyclerView.getChildAdapterPosition(v);
-                    //Log.d(MainActivity.TAG, "onClick position = " + position);
+                    Log.d(MainActivity.TAG, "onClick position = " + position);
                     if (hasPermissions()) {
                         changeDirectory(displayedList.get(position).getAbsoluteFile());
                     }
@@ -273,6 +269,8 @@ public class ManagerFragment extends Fragment {
                 return false;
             }
         });
+
+        //requestPermissionWithRationale(v);
 
         if (!hasPermissions()) {
             requestPerms();
@@ -362,7 +360,7 @@ public class ManagerFragment extends Fragment {
                         Log.d(MainActivity.TAG, "path = " + mSelectedDir.getAbsolutePath());
                         boolean renameSuccessful = displayedList.get(position).renameTo(newFile);
                         Toast.makeText(getActivity(), "successful rename = " + renameSuccessful, Toast.LENGTH_SHORT).show();
-                        //TODO
+
                         Log.d(MainActivity.TAG, "files = " + mFilesInDir.get(position).getName());
                         Log.d(MainActivity.TAG, "files = " + mFilesInDir.get(position).getAbsolutePath());
                         Log.d(MainActivity.TAG, "displayed = " + displayedList.get(position).getName());
@@ -380,21 +378,11 @@ public class ManagerFragment extends Fragment {
                             displayedList.clear();
                             displayedList.addAll(mFilesInDir);
                             sortFiles(sortWay);
-                            if (!searchString.equals("")) {
-                                filterList(searchString);
-                            }
-
-                        recyclerView.getAdapter().notifyDataSetChanged();
                     }
                 });
-
-
-
         builder.setView(input);
-
         AlertDialog alert = builder.create();
         alert.show();
-
     }
 
     @Override
@@ -424,6 +412,23 @@ public class ManagerFragment extends Fragment {
         requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 MY_PERMISSIONS_REQUEST);
     }
+
+/*    public void requestPermissionWithRationale(View view) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            final String message = "Storage permission is needed to show files";
+            Snackbar.make(view, message, Snackbar.LENGTH_LONG)
+                    .setAction("GRANT", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            requestPerms();
+                        }
+                    })
+                    .show();
+        } else {
+            requestPerms();
+        }
+    }*/
 
     private void setInitialDir() {
         //Log.d(MainActivity.TAG, "ExplorerFragment setInitialDir");
@@ -549,6 +554,7 @@ public class ManagerFragment extends Fragment {
      *            will not be changed
      */
     private void changeDirectory(final File dir) {
+        Log.d(MainActivity.TAG, "changeDirectory");
         if (dir == null) {
             debug("Could not change folder: dir was null");
         } else if (!dir.isDirectory()) {
@@ -576,6 +582,7 @@ public class ManagerFragment extends Fragment {
                 intent.putExtra("type", "text");
                 startActivity(intent);
             } else {
+                Log.d(MainActivity.TAG, "target");
                 Intent target = new Intent(Intent.ACTION_VIEW);
                 target.setDataAndType(Uri.fromFile(dir), mimeType);
                 target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -587,9 +594,6 @@ public class ManagerFragment extends Fragment {
                     Log.d(MainActivity.TAG, "error createChooser");
                     // Instruct the user to install a PDF reader here, or something
                 }
-
-
-
             }
         } else {
             sortWay = 0;
