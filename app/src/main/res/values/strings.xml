@@ -16,4 +16,9 @@
     <string name="a_z">from A to Z</string>
     <string name="z_a">from Z to A</string>
     <string name="info">Info</string>
+    <string name="rate">Rate</string>
+    <string name="about_us">They call us MD Group</string>
+    <string name="rate_us">Please rate this app</string>
+    <string name="rename">Rename</string>
+    <string name="ok">OK</string>
 </resources>

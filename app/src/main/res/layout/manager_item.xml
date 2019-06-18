@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/opaque00"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -14,6 +15,7 @@
 
         <ImageView
             android:id="@+id/pictureImageView"
+            android:tint="@color/colorIcon2"
             android:layout_width="30dp"
             android:layout_height="30dp"
             app:srcCompat="@drawable/folder" />
@@ -26,9 +28,7 @@
             android:gravity="left"
             android:paddingLeft="10dp"
             android:text="text"
-            android:textColor="#ffffff"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            style="@style/MainText"/>
 
         <TextView
             android:id="@+id/dateTextView"
@@ -38,8 +38,9 @@
             android:gravity="right"
             android:paddingLeft="10dp"
             android:text="date"
+            android:typeface="monospace"
             android:textColor="@color/colorGray1"
-            android:textSize="12sp" />
+            android:textSize="10sp" />
 
     </LinearLayout>
 

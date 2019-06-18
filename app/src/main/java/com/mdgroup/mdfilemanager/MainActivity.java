@@ -2,13 +2,16 @@ package com.mdgroup.mdfilemanager;
 
 import android.content.ClipData;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -19,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
 
     public static String TAG = "tag";
     private ManagerFragment managerFragment;
+    private AboutFragment aboutFragment;
     private Toolbar toolbarTop;
     private ImageView iconToolbarImageView;
     private TextView toolbarTitleTextView;
@@ -27,7 +31,16 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "MainActivity onCreate");
+
+/*        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));*/
+
+//You need to use a Theme.AppCompat theme (or descendant) with this activity
+
         setContentView(R.layout.activity_main);
+
+        Log.d(TAG, "MainActivity setContentView");
 
         toolbarTop = (Toolbar) findViewById(R.id.mainToolbar);
         setSupportActionBar(toolbarTop);
@@ -60,17 +73,16 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-/*            case R.id.menu_remote:
-                Toast.makeText(MainActivity.this, getResources().getString(R.string.remote_access), Toast.LENGTH_SHORT).show();
-                break;*/
+            case R.id.menu_info:
+                aboutFragment = new AboutFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("main_stack").commit();
+                break;
             case R.id.menu_sort:
-                Toast.makeText(MainActivity.this, getString(R.string.sort), Toast.LENGTH_SHORT).show();
                 if (managerFragment != null) {
                     managerFragment.onSortListPressed();
                 }
                 break;
             case R.id.menu_search:
-                Toast.makeText(MainActivity.this, getString(R.string.search), Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -133,11 +145,13 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
         Log.d(TAG, "MainActivity onBackPressed");
-        if (managerFragment != null) {
-            managerFragment.onBackPressed();
-        }
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() == 1) {
+            if (managerFragment != null) {
+                managerFragment.onBackPressed();
+            }
+        } else super.onBackPressed();
     }
 
     @Override

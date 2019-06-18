@@ -1,12 +1,14 @@
 package com.mdgroup.mdfilemanager;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -21,6 +23,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
@@ -57,6 +61,8 @@ public class ManagerFragment extends Fragment {
     private String sortDialogItems[];
     private String bufferedFilePath;
     private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private int sortWay;
+    private String searchString;
 
 
     public void setListener(FragmentInteractionListener listener) {
@@ -74,6 +80,7 @@ public class ManagerFragment extends Fragment {
     public void filterList(String string) {
         Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
         filteredList.clear();
+        searchString = string;
         if (string.equals("")) {
             displayedList.clear();
             displayedList.addAll(mFilesInDir);
@@ -95,6 +102,7 @@ public class ManagerFragment extends Fragment {
     public void unfilterList() {
         displayedList.clear();
         displayedList.addAll(mFilesInDir);
+        searchString = "";
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 
@@ -144,6 +152,8 @@ public class ManagerFragment extends Fragment {
         ArrayList<File> dirList = new ArrayList<>();
         ArrayList<File> fileList = new ArrayList<>();
         Comparator<File> comparator;
+        sortWay = 0;
+        searchString = "";
 
         for (int i = 0; i < mFilesInDir.size(); i++) {
             if (mFilesInDir.get(i).isDirectory()) {
@@ -215,7 +225,9 @@ public class ManagerFragment extends Fragment {
         dialogItems = new String[] {getActivity().getResources().getString(R.string.copy),
                 getActivity().getResources().getString(R.string.paste),
                 getActivity().getResources().getString(R.string.cut),
-                getActivity().getResources().getString(R.string.delete)};
+                getActivity().getResources().getString(R.string.delete),
+                getActivity().getResources().getString(R.string.rename)
+        };
 
         sortDialogItems = new String[] {getActivity().getResources().getString(R.string.a_z),
                 getActivity().getResources().getString(R.string.z_a),
@@ -312,11 +324,77 @@ public class ManagerFragment extends Fragment {
                                 Log.d(MainActivity.TAG, "delete");
                                 deleteFile(position);
                                 break;
+                            case 4:
+                                Log.d(MainActivity.TAG, "rename");
+                                renameFile(position);
+                                break;
                         }
                     }
                 });
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void renameFile(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
+
+        final EditText input = new EditText(getActivity());
+        input.setText(displayedList.get(position).getName());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+
+        builder.setTitle(R.string.choose)
+                .setTitle("Rename file/folder")
+                .setCancelable(true)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String newName = input.getText().toString();
+                        File newFile = new File(mSelectedDir.getAbsolutePath(), newName);
+                        Log.d(MainActivity.TAG, "path = " + mSelectedDir.getAbsolutePath());
+                        boolean renameSuccessful = displayedList.get(position).renameTo(newFile);
+                        Toast.makeText(getActivity(), "successful rename = " + renameSuccessful, Toast.LENGTH_SHORT).show();
+                        //TODO
+                        Log.d(MainActivity.TAG, "files = " + mFilesInDir.get(position).getName());
+                        Log.d(MainActivity.TAG, "files = " + mFilesInDir.get(position).getAbsolutePath());
+                        Log.d(MainActivity.TAG, "displayed = " + displayedList.get(position).getName());
+                        Log.d(MainActivity.TAG, "displayed = " + displayedList.get(position).getAbsolutePath());
+
+                        final File[] contents = mSelectedDir.listFiles();
+                        if (contents != null) {
+                            int numDirectories = contents.length;
+                            mFilesInDir.clear();
+                            for (int i = 0, counter = 0; i < numDirectories; counter++) {
+                                mFilesInDir.add(contents[counter]);
+                                i++;
+                            }
+                        }
+                            displayedList.clear();
+                            displayedList.addAll(mFilesInDir);
+                            sortFiles(sortWay);
+                            if (!searchString.equals("")) {
+                                filterList(searchString);
+                            }
+
+                        recyclerView.getAdapter().notifyDataSetChanged();
+                    }
+                });
+
+
+
+        builder.setView(input);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
     }
 
     @Override
@@ -475,7 +553,7 @@ public class ManagerFragment extends Fragment {
             debug("Could not change folder: dir was null");
         } else if (!dir.isDirectory()) {
             String mimeType = checkFileType(dir.getAbsolutePath());
-            if (mimeType.startsWith("image")) {
+/*            if (mimeType.startsWith("image")) {
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
                 intent.putExtra("uri", dir.getAbsolutePath());
                 intent.putExtra("type", "image");
@@ -491,13 +569,31 @@ public class ManagerFragment extends Fragment {
                 intent.putExtra("type", "audio");
                 startActivity(intent);
             }
-            else if (mimeType.startsWith("text")) {
+            else */
+            if (mimeType.startsWith("text")) {
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
                 intent.putExtra("uri", dir.getAbsolutePath());
                 intent.putExtra("type", "text");
                 startActivity(intent);
+            } else {
+                Intent target = new Intent(Intent.ACTION_VIEW);
+                target.setDataAndType(Uri.fromFile(dir), mimeType);
+                target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+                Intent intent = Intent.createChooser(target, "Open File");
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Log.d(MainActivity.TAG, "error createChooser");
+                    // Instruct the user to install a PDF reader here, or something
+                }
+
+
+
             }
         } else {
+            sortWay = 0;
+            searchString = "";
             final File[] contents = dir.listFiles();
             String path1 = dir.getAbsolutePath();
             String path2 = path1.replace("/", " > ");
@@ -515,7 +611,7 @@ public class ManagerFragment extends Fragment {
                 displayedList.clear();
                 displayedList.addAll(mFilesInDir);
                 mSelectedDir = dir;
-                sortFiles(0);
+                sortFiles(sortWay);
                 //recyclerView.getAdapter().notifyDataSetChanged();
                 //debug("Changed directory to %s", dir.getAbsolutePath());
             }
