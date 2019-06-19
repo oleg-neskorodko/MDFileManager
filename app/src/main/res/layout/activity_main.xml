@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/opaque70"
+    android:background="@color/opaque80"
     tools:context=".MainActivity">
 
 
@@ -19,7 +19,7 @@
             android:id="@+id/mainToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorToolbar"
+            android:background="@color/colorBlack"
             android:minHeight="?attr/actionBarSize">
 
             <LinearLayout
@@ -39,9 +39,10 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:paddingLeft="5dp"
-                    android:text="@string/app_name"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
+                    android:text="@string/toolbar_name"
+                    android:textColor="@color/colorGray1"
+                    android:textSize="14sp"
+                    android:typeface="monospace"
                     android:textStyle="bold" />
             </LinearLayout>
 

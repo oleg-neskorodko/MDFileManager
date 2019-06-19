@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,8 +25,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
@@ -37,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class ManagerFragment extends Fragment {
 
@@ -111,15 +117,15 @@ public class ManagerFragment extends Fragment {
 
     private void makeSortDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
-        builder.setTitle(R.string.sort_list)
-                .setCancelable(true)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.sort_list);
+        builder.setCancelable(true);
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
-                })
-                .setItems(sortDialogItems, new DialogInterface.OnClickListener() {
+                });
+/*        builder.setItems(sortDialogItems, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int item) {
                         switch (item) {
@@ -141,8 +147,71 @@ public class ManagerFragment extends Fragment {
                                 break;
                         }
                     }
-                });
-        AlertDialog alert = builder.create();
+                });*/
+
+
+        ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, sortDialogItems) {
+
+            ViewHolder holder;
+
+            class ViewHolder {
+                ImageView icon;
+                TextView title;
+            }
+
+            public View getView(int position, View convertView, ViewGroup parent) {
+                final LayoutInflater inflater = (LayoutInflater) getActivity()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                if (convertView == null) {convertView = inflater.inflate(R.layout.list_item, null);
+
+                    holder = new ViewHolder();
+                    holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.title = (TextView) convertView.findViewById(R.id.title);
+                    convertView.setTag(holder);
+                } else {
+                    // view already defined, retrieve view holder
+                    holder = (ViewHolder) convertView.getTag();
+                }
+
+                holder.title.setText(sortDialogItems[position]);
+
+                holder.icon.setVisibility(View.GONE);
+                return convertView;
+            }
+        };
+
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        Log.d(MainActivity.TAG, "a_z");
+                        sortFiles(0);
+                        break;
+                    case 1:
+                        Log.d(MainActivity.TAG, "z_a");
+                        sortFiles(1);
+                        break;
+                    case 2:
+                        Log.d(MainActivity.TAG, "old_new");
+                        sortFiles(2);
+                        break;
+                    case 3:
+                        Log.d(MainActivity.TAG, "new_old");
+                        sortFiles(3);
+                        break;
+                }
+            }
+        });
+
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener( new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+            }
+        });
         alert.show();
     }
 
@@ -283,9 +352,15 @@ public class ManagerFragment extends Fragment {
 
     private void makeDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
-        builder.setTitle(R.string.choose)
-                .setCancelable(true)
-                .setItems(dialogItems, new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.choose);
+        builder.setCancelable(true);
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+/*                builder.setItems(dialogItems, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int item) {
                         switch (item) {
@@ -328,8 +403,109 @@ public class ManagerFragment extends Fragment {
                                 break;
                         }
                     }
-                });
-        AlertDialog alert = builder.create();
+                });*/
+
+// dialog list entries
+
+
+// dialog list icons: some examples here
+        final int[] icons = {
+                R.drawable.copy,
+                R.drawable.paste,
+                R.drawable.cut,
+                R.drawable.delete,
+                R.drawable.rename,
+        };
+
+        ListAdapter adapter = new ArrayAdapter<String>(
+                getActivity(), R.layout.list_item, dialogItems) {
+
+            ViewHolder holder;
+
+            class ViewHolder {
+                ImageView icon;
+                TextView title;
+            }
+
+            public View getView(int position, View convertView, ViewGroup parent) {
+                final LayoutInflater inflater = (LayoutInflater) getActivity()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                if (convertView == null) {convertView = inflater.inflate(R.layout.list_item, null);
+
+                    holder = new ViewHolder();
+                    holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.title = (TextView) convertView.findViewById(R.id.title);
+                    convertView.setTag(holder);
+                } else {
+                    // view already defined, retrieve view holder
+                    holder = (ViewHolder) convertView.getTag();
+                }
+
+                holder.title.setText(dialogItems[position]);
+
+                holder.icon.setImageResource(icons[position]);
+                Log.d(MainActivity.TAG, "adapter ready");
+                return convertView;
+            }
+        };
+
+
+
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        Log.d(MainActivity.TAG, "copy");
+                        getPath(position);
+                        cutFile = false;
+                        break;
+                    case 1:
+                        if (bufferedFilePath.equals("")) {
+                            Toast.makeText(getActivity(), "no file to paste", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        if (!displayedList.get(position).isDirectory()) {
+                            Toast.makeText(getActivity(), "please select destination folder", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        Log.d(MainActivity.TAG, "paste");
+                        if (cutFile) {
+                            copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
+                            deleteFile(bufferedFilePath);
+                            bufferedFilePath = "";
+                        } else {
+                            copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
+                            bufferedFilePath = "";
+                        }
+                        break;
+                    case 2:
+                        Log.d(MainActivity.TAG, "cut");
+                        getPath(position);
+                        cutFile = true;
+                        break;
+                    case 3:
+                        Log.d(MainActivity.TAG, "delete");
+                        deleteFile(position);
+                        break;
+                    case 4:
+                        Log.d(MainActivity.TAG, "rename");
+                        renameFile(position);
+                        break;
+                }
+            }
+        });
+
+
+        final AlertDialog alert = builder.create();
+
+        alert.setOnShowListener( new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+            }
+        });
         alert.show();
     }
 
@@ -584,16 +760,42 @@ public class ManagerFragment extends Fragment {
             } else {
                 Log.d(MainActivity.TAG, "target");
                 Intent target = new Intent(Intent.ACTION_VIEW);
-                target.setDataAndType(Uri.fromFile(dir), mimeType);
-                target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+/*                target.setTypeAndNormalize(mimeType);
+                target.setDataAndNormalize(Uri.fromFile(dir));*/
+                //intent.setDataAndType(uri, "*/*");
 
-                Intent intent = Intent.createChooser(target, "Open File");
+                //Uri targetUri = Uri.fromFile(dir);
+                Uri targetUri = FileProvider.getUriForFile(getActivity(), getActivity()
+                        .getApplicationContext().getPackageName(), dir);
+                target.setDataAndType(targetUri, mimeType);
+                target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                Log.d(MainActivity.TAG, "target ready = " + mimeType);
+                Log.d(MainActivity.TAG, "data = " + targetUri.toString());
+
+
+                PackageManager packageManager = getActivity().getPackageManager();
+                List<ResolveInfo> activities = packageManager.queryIntentActivities(target, 0);
+                boolean isIntentSafe = activities.size() > 0;
+                //Log.d(MainActivity.TAG, "isIntentSafe ready " + activities.get(0).toString());
+                Log.d(MainActivity.TAG, "isIntentSafe = " + isIntentSafe);
+
+                if (isIntentSafe) {
+                    Log.d(MainActivity.TAG, "isIntentSafe true");
+                    startActivity(target);
+                } else {
+                    Log.d(MainActivity.TAG, "isIntentSafe false");
+                    Toast.makeText(getActivity(), "no such app", Toast.LENGTH_SHORT).show();
+                }
+
+/*                Intent intent = Intent.createChooser(target, "Open File");
                 try {
                     startActivity(intent);
                 } catch (ActivityNotFoundException e) {
                     Log.d(MainActivity.TAG, "error createChooser");
                     // Instruct the user to install a PDF reader here, or something
-                }
+                }*/
             }
         } else {
             sortWay = 0;

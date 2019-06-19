@@ -11,7 +11,7 @@
     <TextView
         android:id="@+id/directoryTextView"
         android:text="text"
-        android:textColor="#ffffff"
+        style="@style/SupportingText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

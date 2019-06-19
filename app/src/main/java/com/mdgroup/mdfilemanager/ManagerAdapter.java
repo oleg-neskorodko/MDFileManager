@@ -19,7 +19,9 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     private View.OnLongClickListener longClickListener;
     private ArrayList<File> objects;
     private Context context;
-    private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yy HH:mm");
+    private SimpleDateFormat sdf2 = new SimpleDateFormat("dd.MM.yy");
+    private SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm");
 
     public ManagerAdapter(Context context, ArrayList<File> objects) {
         this.context = context;
@@ -66,7 +68,8 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
 
         holder.nameTextView.setText(objects.get(position).getName());
         long date = objects.get(position).lastModified();
-        holder.dateTextView.setText(sdf1.format(date));
+        holder.dateTextView.setText(sdf2.format(date));
+        holder.timeTextView.setText(sdf3.format(date));
         if (objects.get(position).isDirectory()) {
             holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.folder));
         } else {
@@ -103,12 +106,14 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView;
         TextView dateTextView;
+        TextView timeTextView;
         ImageView pictureImageView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.nameTextView);
             dateTextView = itemView.findViewById(R.id.dateTextView);
+            timeTextView = itemView.findViewById(R.id.timeTextView);
             pictureImageView = itemView.findViewById(R.id.pictureImageView);
         }
     }

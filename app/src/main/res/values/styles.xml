@@ -9,7 +9,13 @@
     </style>
 
     <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:background">@color/colorGray1</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/opaque60</item>
+        <item name="android:textColor">@color/colorGreen1</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:textColorAlertDialogListItem">@color/colorGreen1</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.NoActionBar">
@@ -23,9 +29,15 @@
 
     <style name="MainText" parent="android:Widget.TextView">
         <item name="android:textColor">@color/colorGreen1</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:typeface">monospace</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SupportingText" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorGray1</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:typeface">monospace</item>
     </style>
 
 </resources>
