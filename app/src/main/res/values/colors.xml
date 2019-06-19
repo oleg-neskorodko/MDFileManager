@@ -10,7 +10,7 @@
     <color name="colorIcon">#C2A697</color>
     <color name="opaque00">#00000000</color>
     <color name="opaque70">#B2000000</color>
-    <color name="opaque50">#796578A2</color>
+    <color name="opaque60">#99000000</color>
     <color name="colorGreen1">#0CA10D</color>
     <color name="colorIcon2">#39B8D1</color>
 </resources>
