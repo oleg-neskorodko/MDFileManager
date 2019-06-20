@@ -2,6 +2,7 @@ package com.mdgroup.mdfilemanager;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +71,28 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         long date = objects.get(position).lastModified();
         holder.dateTextView.setText(sdf2.format(date));
         holder.timeTextView.setText(sdf3.format(date));
+
+        long size = getFolderSize(objects.get(position));
+        Log.d(MainActivity.TAG, "size = " + size);
+        if (size >= 0) {
+            String measure = context.getString(R.string.bytes);
+            if (size >= 1024) {
+                size /= 1024;
+                measure = context.getString(R.string.kilobytes);
+                if (size >= 1024) {
+                    size /= 1024;
+                    measure = context.getString(R.string.megabytes);
+                    if (size >= 1024) {
+                        size /= 1024;
+                        measure = context.getString(R.string.gigabytes);
+                    }
+                }
+            }
+            holder.discSpaceTextView.setText(String.valueOf(size) + " " + measure);
+        } else holder.discSpaceTextView.setText("");
+
+
+
         if (objects.get(position).isDirectory()) {
             holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.folder));
         } else {
@@ -86,6 +109,39 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
             }
         }
     }
+
+
+    // WAY 1
+    private static long getFolderSize(File file) {
+        long size = 0;
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                size += getFolderSize(child);
+            }
+        } else {
+            size = file.length();
+        }
+        return size;
+    }
+
+    // WAY 2
+/*    private static long getFolderSize(File file) {
+        long size = 0;
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                if (child.isDirectory()) {
+                    size = -1;
+                    break;
+                } else {
+                    size += child.length();
+                }
+            }
+        } else {
+            size = file.length();
+        }
+        return size;
+    }*/
+
 
     private String checkFileType(String path) {
         String mimeType = URLConnection.guessContentTypeFromName(path);
@@ -107,6 +163,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         TextView nameTextView;
         TextView dateTextView;
         TextView timeTextView;
+        TextView discSpaceTextView;
         ImageView pictureImageView;
 
         public ViewHolder(View itemView) {
@@ -114,6 +171,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
             nameTextView = itemView.findViewById(R.id.nameTextView);
             dateTextView = itemView.findViewById(R.id.dateTextView);
             timeTextView = itemView.findViewById(R.id.timeTextView);
+            discSpaceTextView = itemView.findViewById(R.id.discSpaceTextView);
             pictureImageView = itemView.findViewById(R.id.pictureImageView);
         }
     }

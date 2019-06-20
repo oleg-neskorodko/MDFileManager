@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -156,7 +157,7 @@ public class ManagerFragment extends Fragment {
 
             class ViewHolder {
                 ImageView icon;
-                TextView title;
+                TextView titleTextView;
             }
 
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -166,17 +167,17 @@ public class ManagerFragment extends Fragment {
                 if (convertView == null) {convertView = inflater.inflate(R.layout.list_item, null);
 
                     holder = new ViewHolder();
-                    holder.icon = (ImageView) convertView.findViewById(R.id.icon);
-                    holder.title = (TextView) convertView.findViewById(R.id.title);
+                    //holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
                     convertView.setTag(holder);
                 } else {
                     // view already defined, retrieve view holder
                     holder = (ViewHolder) convertView.getTag();
                 }
 
-                holder.title.setText(sortDialogItems[position]);
+                holder.titleTextView.setText(sortDialogItems[position]);
 
-                holder.icon.setVisibility(View.GONE);
+                //holder.icon.setVisibility(View.GONE);
                 return convertView;
             }
         };
@@ -405,10 +406,6 @@ public class ManagerFragment extends Fragment {
                     }
                 });*/
 
-// dialog list entries
-
-
-// dialog list icons: some examples here
         final int[] icons = {
                 R.drawable.copy,
                 R.drawable.paste,
@@ -417,14 +414,13 @@ public class ManagerFragment extends Fragment {
                 R.drawable.rename,
         };
 
-        ListAdapter adapter = new ArrayAdapter<String>(
-                getActivity(), R.layout.list_item, dialogItems) {
+        ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, dialogItems) {
 
             ViewHolder holder;
 
             class ViewHolder {
-                ImageView icon;
-                TextView title;
+                //ImageView icon;
+                TextView titleTextView;
             }
 
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -432,19 +428,20 @@ public class ManagerFragment extends Fragment {
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
                 if (convertView == null) {convertView = inflater.inflate(R.layout.list_item, null);
+                    Log.d(MainActivity.TAG, "convertView null");
 
                     holder = new ViewHolder();
-                    holder.icon = (ImageView) convertView.findViewById(R.id.icon);
-                    holder.title = (TextView) convertView.findViewById(R.id.title);
+                    //holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
                     convertView.setTag(holder);
                 } else {
+                    Log.d(MainActivity.TAG, "convertView defined");
                     // view already defined, retrieve view holder
                     holder = (ViewHolder) convertView.getTag();
                 }
 
-                holder.title.setText(dialogItems[position]);
-
-                holder.icon.setImageResource(icons[position]);
+                holder.titleTextView.setText(dialogItems[position]);
+                //holder.icon.setImageResource(icons[position]);
                 Log.d(MainActivity.TAG, "adapter ready");
                 return convertView;
             }
@@ -735,6 +732,7 @@ public class ManagerFragment extends Fragment {
             debug("Could not change folder: dir was null");
         } else if (!dir.isDirectory()) {
             String mimeType = checkFileType(dir.getAbsolutePath());
+            Log.d(MainActivity.TAG, "mimeType = " + mimeType);
 /*            if (mimeType.startsWith("image")) {
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
                 intent.putExtra("uri", dir.getAbsolutePath());
@@ -752,7 +750,7 @@ public class ManagerFragment extends Fragment {
                 startActivity(intent);
             }
             else */
-            if (mimeType.startsWith("text")) {
+            if (mimeType.startsWith("text") && !mimeType.equals("text/html")) {
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
                 intent.putExtra("uri", dir.getAbsolutePath());
                 intent.putExtra("type", "text");
@@ -760,25 +758,16 @@ public class ManagerFragment extends Fragment {
             } else {
                 Log.d(MainActivity.TAG, "target");
                 Intent target = new Intent(Intent.ACTION_VIEW);
-/*                target.setTypeAndNormalize(mimeType);
-                target.setDataAndNormalize(Uri.fromFile(dir));*/
-                //intent.setDataAndType(uri, "*/*");
-
-                //Uri targetUri = Uri.fromFile(dir);
-                Uri targetUri = FileProvider.getUriForFile(getActivity(), getActivity()
-                        .getApplicationContext().getPackageName(), dir);
+                Uri targetUri = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".fileprovider", dir);
+                Log.d(MainActivity.TAG, "data = " + targetUri.toString());
                 target.setDataAndType(targetUri, mimeType);
                 target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                 Log.d(MainActivity.TAG, "target ready = " + mimeType);
-                Log.d(MainActivity.TAG, "data = " + targetUri.toString());
-
 
                 PackageManager packageManager = getActivity().getPackageManager();
                 List<ResolveInfo> activities = packageManager.queryIntentActivities(target, 0);
                 boolean isIntentSafe = activities.size() > 0;
-                //Log.d(MainActivity.TAG, "isIntentSafe ready " + activities.get(0).toString());
                 Log.d(MainActivity.TAG, "isIntentSafe = " + isIntentSafe);
 
                 if (isIntentSafe) {
@@ -788,14 +777,6 @@ public class ManagerFragment extends Fragment {
                     Log.d(MainActivity.TAG, "isIntentSafe false");
                     Toast.makeText(getActivity(), "no such app", Toast.LENGTH_SHORT).show();
                 }
-
-/*                Intent intent = Intent.createChooser(target, "Open File");
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Log.d(MainActivity.TAG, "error createChooser");
-                    // Instruct the user to install a PDF reader here, or something
-                }*/
             }
         } else {
             sortWay = 0;

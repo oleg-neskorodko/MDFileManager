@@ -57,6 +57,16 @@
                 android:paddingLeft="10dp"
                 android:text="time" />
 
+            <TextView
+                android:id="@+id/discSpaceTextView"
+                style="@style/SupportingText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="right"
+                android:paddingLeft="10dp"
+                android:text="space" />
+
         </LinearLayout>
 
     </RelativeLayout>

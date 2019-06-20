@@ -22,4 +22,9 @@
     <string name="rate_us">Please rate this app</string>
     <string name="rename">Rename</string>
     <string name="ok">OK</string>
+    <string name="bytes">B</string>
+    <string name="kilobytes">KB</string>
+    <string name="megabytes">MB</string>
+    <string name="gigabytes">GB</string>
+    <string name="empty_word">empty</string>
 </resources>
