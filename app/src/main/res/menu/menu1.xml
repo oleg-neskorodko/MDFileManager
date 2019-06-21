@@ -10,9 +10,33 @@
     <item
         android:id="@+id/menu_search"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="always|never"
+        app:showAsAction="always"
         android:icon="@drawable/search"
         android:title="@string/search">
+    </item>
+    <item
+        android:id="@+id/menu_paste"
+        app:showAsAction="always"
+        android:icon="@drawable/paste2"
+        android:title="@string/paste">
+    </item>
+    <item
+        android:id="@+id/new_folder"
+        app:showAsAction="always"
+        android:icon="@drawable/new_folder2"
+        android:title="@string/new_folder">
+    </item>
+    <item
+        android:id="@+id/new_file"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/new_file2"
+        android:title="@string/new_file">
+    </item>
+    <item
+        android:id="@+id/menu_settings"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/settings2"
+        android:title="@string/settings">
     </item>
     <item
         android:id="@+id/menu_info"

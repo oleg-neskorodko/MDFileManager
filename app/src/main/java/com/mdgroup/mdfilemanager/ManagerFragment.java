@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -83,198 +84,11 @@ public class ManagerFragment extends Fragment {
         }
     }
 
-    public void filterList(String string) {
-        Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
-        filteredList.clear();
-        searchString = string;
-        if (string.equals("")) {
-            displayedList.clear();
-            displayedList.addAll(mFilesInDir);
-            recyclerView.getAdapter().notifyDataSetChanged();
-        } else if (mFilesInDir.size() > 0) {
-            for (int i = 0; i < mFilesInDir.size(); i++) {
-
-                if (mFilesInDir.get(i).getName().toLowerCase().contains(string.toLowerCase())) {
-                    Log.d(MainActivity.TAG, "work");
-                    filteredList.add(mFilesInDir.get(i));
-                }
-            }
-            displayedList.clear();
-            displayedList.addAll(filteredList);
-            recyclerView.getAdapter().notifyDataSetChanged();
-        }
-    }
-
-    public void unfilterList() {
-        displayedList.clear();
-        displayedList.addAll(mFilesInDir);
-        searchString = "";
-        recyclerView.getAdapter().notifyDataSetChanged();
-    }
-
-    public void onSortListPressed() {
-        makeSortDialog();
-    }
-
-    private void makeSortDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
-        builder.setTitle(R.string.sort_list);
-        builder.setCancelable(true);
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-/*        builder.setItems(sortDialogItems, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int item) {
-                        switch (item) {
-                            case 0:
-                                Log.d(MainActivity.TAG, "a_z");
-                                sortFiles(0);
-                                break;
-                            case 1:
-                                Log.d(MainActivity.TAG, "z_a");
-                                sortFiles(1);
-                                break;
-                            case 2:
-                                Log.d(MainActivity.TAG, "old_new");
-                                sortFiles(2);
-                                break;
-                            case 3:
-                                Log.d(MainActivity.TAG, "new_old");
-                                sortFiles(3);
-                                break;
-                        }
-                    }
-                });*/
-
-
-        ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, sortDialogItems) {
-
-            ViewHolder holder;
-
-            class ViewHolder {
-                ImageView icon;
-                TextView titleTextView;
-            }
-
-            public View getView(int position, View convertView, ViewGroup parent) {
-                final LayoutInflater inflater = (LayoutInflater) getActivity()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-                if (convertView == null) {convertView = inflater.inflate(R.layout.list_item, null);
-
-                    holder = new ViewHolder();
-                    //holder.icon = (ImageView) convertView.findViewById(R.id.icon);
-                    holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
-                    convertView.setTag(holder);
-                } else {
-                    // view already defined, retrieve view holder
-                    holder = (ViewHolder) convertView.getTag();
-                }
-
-                holder.titleTextView.setText(sortDialogItems[position]);
-
-                //holder.icon.setVisibility(View.GONE);
-                return convertView;
-            }
-        };
-
-        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        Log.d(MainActivity.TAG, "a_z");
-                        sortFiles(0);
-                        break;
-                    case 1:
-                        Log.d(MainActivity.TAG, "z_a");
-                        sortFiles(1);
-                        break;
-                    case 2:
-                        Log.d(MainActivity.TAG, "old_new");
-                        sortFiles(2);
-                        break;
-                    case 3:
-                        Log.d(MainActivity.TAG, "new_old");
-                        sortFiles(3);
-                        break;
-                }
-            }
-        });
-
-        final AlertDialog alert = builder.create();
-        alert.setOnShowListener( new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface arg0) {
-                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
-            }
-        });
-        alert.show();
-    }
-
-    private void sortFiles(int way) {
-
-        ArrayList<File> dirList = new ArrayList<>();
-        ArrayList<File> fileList = new ArrayList<>();
-        Comparator<File> comparator;
-
-        for (int i = 0; i < mFilesInDir.size(); i++) {
-            if (mFilesInDir.get(i).isDirectory()) {
-                dirList.add(mFilesInDir.get(i));
-            } else {
-                fileList.add(mFilesInDir.get(i));
-            }
-        }
-
-        if (way == 2 || way == 3) {
-            comparator = new Comparator<File>() {
-                @Override
-                public int compare(File o1, File o2) {
-                    return Long.compare(o1.lastModified(), o2.lastModified());
-                }
-            };
-        } else {
-            comparator = new Comparator<File>() {
-                @Override
-                public int compare(File o1, File o2) {
-                    return o1.getName().compareToIgnoreCase(o2.getName());
-                }
-            };
-        }
-
-        Collections.sort(dirList, comparator);
-        Collections.sort(fileList, comparator);
-        if (way == 1 || way == 3) {
-            Collections.reverse(dirList);
-            Collections.reverse(fileList);
-        }
-
-        mFilesInDir.clear();
-        mFilesInDir.addAll(dirList);
-        mFilesInDir.addAll(fileList);
-        displayedList.clear();
-        displayedList.addAll(mFilesInDir);
-        recyclerView.getAdapter().notifyDataSetChanged();
-    }
-
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mInitialDirectory = savedInstanceState.getString(KEY_CURRENT_DIRECTORY);
-        }
-    }
-
-    private String checkFileType(String path) {
-        String mimeType = URLConnection.guessContentTypeFromName(path);
-        if (mimeType != null) {
-            return mimeType;
-        } else {
-            return "unknown";
         }
     }
 
@@ -288,14 +102,14 @@ public class ManagerFragment extends Fragment {
         directoryTextView = (TextView) v.findViewById(R.id.directoryTextView);
         longPressed = false;
         cutFile = false;
-        dialogItems = new String[] {getActivity().getResources().getString(R.string.copy),
+        dialogItems = new String[]{getActivity().getResources().getString(R.string.copy),
                 getActivity().getResources().getString(R.string.paste),
                 getActivity().getResources().getString(R.string.cut),
                 getActivity().getResources().getString(R.string.delete),
                 getActivity().getResources().getString(R.string.rename)
         };
 
-        sortDialogItems = new String[] {getActivity().getResources().getString(R.string.a_z),
+        sortDialogItems = new String[]{getActivity().getResources().getString(R.string.a_z),
                 getActivity().getResources().getString(R.string.z_a),
                 getActivity().getResources().getString(R.string.old_new),
                 getActivity().getResources().getString(R.string.new_old)};
@@ -351,6 +165,195 @@ public class ManagerFragment extends Fragment {
         return v;
     }
 
+    public void filterList(String string) {
+        Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
+        filteredList.clear();
+        searchString = string;
+        if (string.equals("")) {
+            displayedList.clear();
+            displayedList.addAll(mFilesInDir);
+            recyclerView.getAdapter().notifyDataSetChanged();
+        } else if (mFilesInDir.size() > 0) {
+            for (int i = 0; i < mFilesInDir.size(); i++) {
+
+                if (mFilesInDir.get(i).getName().toLowerCase().contains(string.toLowerCase())) {
+                    Log.d(MainActivity.TAG, "work");
+                    filteredList.add(mFilesInDir.get(i));
+                }
+            }
+            displayedList.clear();
+            displayedList.addAll(filteredList);
+            recyclerView.getAdapter().notifyDataSetChanged();
+        }
+    }
+
+    public void unfilterList() {
+        displayedList.clear();
+        displayedList.addAll(mFilesInDir);
+        searchString = "";
+        recyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    public void onSortListPressed() {
+        makeSortDialog();
+    }
+
+    private void makeSortDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
+        builder.setTitle(R.string.sort_list);
+        builder.setCancelable(true);
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, sortDialogItems) {
+
+            ViewHolder holder;
+            class ViewHolder {
+                ImageView icon;
+                TextView titleTextView;
+            }
+
+            public View getView(int position, View convertView, ViewGroup parent) {
+                final LayoutInflater inflater = (LayoutInflater) getActivity()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.list_item, null);
+
+                    holder = new ViewHolder();
+                    //holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
+                    convertView.setTag(holder);
+                } else {
+                    // view already defined, retrieve view holder
+                    holder = (ViewHolder) convertView.getTag();
+                }
+
+                holder.titleTextView.setText(sortDialogItems[position]);
+                //holder.icon.setVisibility(View.GONE);
+                return convertView;
+            }
+        };
+
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        Log.d(MainActivity.TAG, "a_z");
+                        sortFiles(0);
+                        break;
+                    case 1:
+                        Log.d(MainActivity.TAG, "z_a");
+                        sortFiles(1);
+                        break;
+                    case 2:
+                        Log.d(MainActivity.TAG, "old_new");
+                        sortFiles(2);
+                        break;
+                    case 3:
+                        Log.d(MainActivity.TAG, "new_old");
+                        sortFiles(3);
+                        break;
+                }
+            }
+        });
+
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+            }
+        });
+        alert.show();
+    }
+
+    private void sortFiles(int way) {
+        ArrayList<File> dirList = new ArrayList<>();
+        ArrayList<File> fileList = new ArrayList<>();
+        Comparator<File> comparator;
+
+        for (int i = 0; i < mFilesInDir.size(); i++) {
+            if (mFilesInDir.get(i).isDirectory()) {
+                dirList.add(mFilesInDir.get(i));
+            } else {
+                fileList.add(mFilesInDir.get(i));
+            }
+        }
+
+        if (way == 2 || way == 3) {
+            comparator = new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return Long.compare(o1.lastModified(), o2.lastModified());
+                }
+            };
+        } else {
+            comparator = new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            };
+        }
+
+        Collections.sort(dirList, comparator);
+        Collections.sort(fileList, comparator);
+        if (way == 1 || way == 3) {
+            Collections.reverse(dirList);
+            Collections.reverse(fileList);
+        }
+
+        mFilesInDir.clear();
+        mFilesInDir.addAll(dirList);
+        mFilesInDir.addAll(fileList);
+        displayedList.clear();
+        displayedList.addAll(mFilesInDir);
+        recyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    private String checkFileType(String path) {
+        String mimeType = URLConnection.guessContentTypeFromName(path);
+        if (mimeType != null) {
+            return mimeType;
+        } else {
+            return "unknown";
+        }
+    }
+
+    public void createNewFolder() {
+        String initialName = getActivity().getResources().getString(R.string.new_folder_name);
+        String suggestedName = initialName;
+        int number = 1;
+        for (int j = 0; j < 1000; j++) {
+            String startLoopName = suggestedName;
+            for (int i = 0; i < mFilesInDir.size(); i++) {
+                if (suggestedName.equals(mFilesInDir.get(i).getName())) {
+                    number++;
+                    suggestedName = initialName.concat(String.valueOf(number));
+                    break;
+                }
+            }
+            if (suggestedName.equals(startLoopName)) {
+                break;
+            }
+        }
+        File newFolder = new File(mSelectedDir, suggestedName);
+        if (newFolder.mkdir()) {
+            mFilesInDir.add(newFolder);
+            displayedList.clear();
+            displayedList.addAll(mFilesInDir);
+            renameFile(mFilesInDir.size() - 1);
+        } else {
+            Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.no_folder_created), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void makeDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
         builder.setTitle(R.string.choose);
@@ -361,50 +364,6 @@ public class ManagerFragment extends Fragment {
                 dialog.dismiss();
             }
         });
-/*                builder.setItems(dialogItems, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int item) {
-                        switch (item) {
-                            case 0:
-                                Log.d(MainActivity.TAG, "copy");
-                                getPath(position);
-                                cutFile = false;
-                                break;
-                            case 1:
-                                if (bufferedFilePath.equals("")) {
-                                    Toast.makeText(getActivity(), "no file to paste", Toast.LENGTH_SHORT).show();
-                                    break;
-                                }
-                                if (!displayedList.get(position).isDirectory()) {
-                                    Toast.makeText(getActivity(), "please select destination folder", Toast.LENGTH_SHORT).show();
-                                    break;
-                                }
-                                Log.d(MainActivity.TAG, "paste");
-                                if (cutFile) {
-                                    copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
-                                    deleteFile(bufferedFilePath);
-                                    bufferedFilePath = "";
-                                } else {
-                                    copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
-                                    bufferedFilePath = "";
-                                }
-                                break;
-                            case 2:
-                                Log.d(MainActivity.TAG, "cut");
-                                getPath(position);
-                                cutFile = true;
-                                break;
-                            case 3:
-                                Log.d(MainActivity.TAG, "delete");
-                                deleteFile(position);
-                                break;
-                            case 4:
-                                Log.d(MainActivity.TAG, "rename");
-                                renameFile(position);
-                                break;
-                        }
-                    }
-                });*/
 
         final int[] icons = {
                 R.drawable.copy,
@@ -417,7 +376,6 @@ public class ManagerFragment extends Fragment {
         ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, dialogItems) {
 
             ViewHolder holder;
-
             class ViewHolder {
                 //ImageView icon;
                 TextView titleTextView;
@@ -427,7 +385,8 @@ public class ManagerFragment extends Fragment {
                 final LayoutInflater inflater = (LayoutInflater) getActivity()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-                if (convertView == null) {convertView = inflater.inflate(R.layout.list_item, null);
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.list_item, null);
                     Log.d(MainActivity.TAG, "convertView null");
 
                     holder = new ViewHolder();
@@ -447,8 +406,6 @@ public class ManagerFragment extends Fragment {
             }
         };
 
-
-
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -456,6 +413,7 @@ public class ManagerFragment extends Fragment {
                     case 0:
                         Log.d(MainActivity.TAG, "copy");
                         getPath(position);
+                        listener.setPasteIconState(true);
                         cutFile = false;
                         break;
                     case 1:
@@ -468,6 +426,7 @@ public class ManagerFragment extends Fragment {
                             break;
                         }
                         Log.d(MainActivity.TAG, "paste");
+                        listener.setPasteIconState(false);
                         if (cutFile) {
                             copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
                             deleteFile(bufferedFilePath);
@@ -480,6 +439,7 @@ public class ManagerFragment extends Fragment {
                     case 2:
                         Log.d(MainActivity.TAG, "cut");
                         getPath(position);
+                        listener.setPasteIconState(true);
                         cutFile = true;
                         break;
                     case 3:
@@ -494,10 +454,8 @@ public class ManagerFragment extends Fragment {
             }
         });
 
-
         final AlertDialog alert = builder.create();
-
-        alert.setOnShowListener( new DialogInterface.OnShowListener() {
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface arg0) {
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
@@ -507,6 +465,7 @@ public class ManagerFragment extends Fragment {
     }
 
     private void renameFile(final int position) {
+        Log.d(MainActivity.TAG, "new dialog = " + mFilesInDir.size());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
 
         final EditText input = new EditText(getActivity());
@@ -516,8 +475,7 @@ public class ManagerFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         input.setLayoutParams(lp);
 
-        builder.setTitle(R.string.choose)
-                .setTitle("Rename file/folder")
+        builder.setTitle(getActivity().getResources().getString(R.string.insert_new_name))
                 .setCancelable(true)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
@@ -532,79 +490,24 @@ public class ManagerFragment extends Fragment {
                         File newFile = new File(mSelectedDir.getAbsolutePath(), newName);
                         Log.d(MainActivity.TAG, "path = " + mSelectedDir.getAbsolutePath());
                         boolean renameSuccessful = displayedList.get(position).renameTo(newFile);
-                        Toast.makeText(getActivity(), "successful rename = " + renameSuccessful, Toast.LENGTH_SHORT).show();
-
-                        Log.d(MainActivity.TAG, "files = " + mFilesInDir.get(position).getName());
-                        Log.d(MainActivity.TAG, "files = " + mFilesInDir.get(position).getAbsolutePath());
-                        Log.d(MainActivity.TAG, "displayed = " + displayedList.get(position).getName());
-                        Log.d(MainActivity.TAG, "displayed = " + displayedList.get(position).getAbsolutePath());
-
-                        final File[] contents = mSelectedDir.listFiles();
-                        if (contents != null) {
-                            int numDirectories = contents.length;
-                            mFilesInDir.clear();
-                            for (int i = 0, counter = 0; i < numDirectories; counter++) {
-                                mFilesInDir.add(contents[counter]);
-                                i++;
-                            }
+                        if (renameSuccessful) {
+                            refreshLists(mSelectedDir);
                         }
-                            displayedList.clear();
-                            displayedList.addAll(mFilesInDir);
-                            sortFiles(sortWay);
                     }
                 });
         builder.setView(input);
-        AlertDialog alert = builder.create();
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+                alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+            }
+        });
         alert.show();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //Log.d(MainActivity.TAG, "ExplorerFragment onRequestPermissionsResult");
-        if (requestCode == MY_PERMISSIONS_REQUEST) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                setInitialDir();
-                changeDirectory(initialDir);
-            }
-            //TODO
-        }
-    }
-
-    private boolean hasPermissions() {
-        //Log.d(MainActivity.TAG, "ExplorerFragment hasPermissions");
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ) {
-            return true;
-        } else return false;
-    }
-
-    private void requestPerms() {
-        //Log.d(MainActivity.TAG, "ExplorerFragment requestPerms");
-        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                MY_PERMISSIONS_REQUEST);
-    }
-
-/*    public void requestPermissionWithRationale(View view) {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            final String message = "Storage permission is needed to show files";
-            Snackbar.make(view, message, Snackbar.LENGTH_LONG)
-                    .setAction("GRANT", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            requestPerms();
-                        }
-                    })
-                    .show();
-        } else {
-            requestPerms();
-        }
-    }*/
-
     private void setInitialDir() {
-        //Log.d(MainActivity.TAG, "ExplorerFragment setInitialDir");
         if (!TextUtils.isEmpty(mInitialDirectory) && isValidFile(new File(mInitialDirectory))) {
             initialDir = new File(mInitialDirectory);
         } else {
@@ -627,37 +530,76 @@ public class ManagerFragment extends Fragment {
         bufferedFilePath = displayedList.get(position).getAbsolutePath();
     }
 
-    public static void copyFileOrDirectory(String srcDir, String dstDir) {
+    public void pasteFileIntoCurrentDirectory() {
+        copyFileOrDirectory(bufferedFilePath, mSelectedDir.getAbsolutePath());
+        refreshLists(mSelectedDir);
+    }
+
+    public void copyFileOrDirectory(String srcDir, String dstDir) {
+        Log.d(MainActivity.TAG, "copyFileOrDirectory ");
 
         try {
             File src = new File(srcDir);
+
+/*            File dstDirectory = new File(dstDir);
+            File[] dstDirFiles = dstDirectory.listFiles();
+            Log.d(MainActivity.TAG, "here " + srcDir + " / " + dstDir);
+
+            String initialName = src.getName();
+            String suggestedName = initialName;
+            int number = 0;
+            for (int j = 0; j < 1000; j++) {
+                String startLoopName = suggestedName;
+                for (int i = 0; i < dstDirFiles.length; i++) {
+                    if (suggestedName.equals(dstDirFiles[i].getName())) {
+                        number++;
+                        suggestedName = initialName + " - copy" + number;
+                        break;
+                    }
+                }
+                if (suggestedName.equals(startLoopName)) {
+                    break;
+                }
+            }
+            Log.d(MainActivity.TAG, "here2 " + suggestedName);
+            File dst = new File(dstDir, suggestedName);*/
+
             File dst = new File(dstDir, src.getName());
 
             if (src.isDirectory()) {
 
                 String files[] = src.list();
-                int filesLength = files.length;
-                for (int i = 0; i < filesLength; i++) {
-                    String src1 = (new File(src, files[i]).getPath());
-                    String dst1 = dst.getPath();
-                    copyFileOrDirectory(src1, dst1);
-
+                if (files.length == 0) {
+                    copyFile(src, dst);
+                } else {
+                    int filesLength = files.length;
+                    for (int i = 0; i < filesLength; i++) {
+                        String src1 = (new File(src, files[i]).getPath());
+                        String dst1 = dst.getPath();
+                        copyFileOrDirectory(src1, dst1);
+                    }
                 }
             } else {
+                Log.d(MainActivity.TAG, "copyFile launch ");
                 copyFile(src, dst);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(MainActivity.TAG, "Exception " + e.toString());
         }
     }
 
     public static void copyFile(File sourceFile, File destFile) throws IOException {
+        Log.d(MainActivity.TAG, "copyFile " + sourceFile.getName() + " " + destFile.getName());
         if (!destFile.getParentFile().exists())
             destFile.getParentFile().mkdirs();
 
         if (!destFile.exists()) {
             destFile.createNewFile();
         }
+/*        if (sourceFile.isDirectory()) {
+            destFile.mkdir();
+        }*/
 
         FileChannel source = null;
         FileChannel destination = null;
@@ -676,16 +618,33 @@ public class ManagerFragment extends Fragment {
         }
     }
 
+    private void recursiveDelete(File file) {
+        if (file.isDirectory()) {
+            File[] filesArray = file.listFiles();
+            for (File entry : filesArray) {
+                recursiveDelete(entry);
+            }
+            if (file.delete()) {
+                Log.d(MainActivity.TAG, "file Deleted :" + file.getAbsolutePath());
+            } else {
+                Log.d(MainActivity.TAG, "file not Deleted :" + file.getAbsolutePath());
+            }
+        } else {
+            if (file.delete()) {
+                Log.d(MainActivity.TAG, "file Deleted :" + file.getAbsolutePath());
+            } else {
+                Log.d(MainActivity.TAG, "file not Deleted :" + file.getAbsolutePath());
+            }
+        }
+    }
+
     //overloaded method
     public void deleteFile(String path) {
         Log.d(MainActivity.TAG, "deleteFile");
         File file = new File(path);
         if (file.exists()) {
-            if (file.delete()) {
-                System.out.println("file Deleted :" + file.getAbsolutePath());
-            } else {
-                System.out.println("file not Deleted :" + file.getAbsolutePath());
-            }
+            recursiveDelete(file);
+            refreshLists(mSelectedDir);
         }
     }
 
@@ -694,19 +653,8 @@ public class ManagerFragment extends Fragment {
         Log.d(MainActivity.TAG, "deleteFile");
         File file = displayedList.get(position);
         if (file.exists()) {
-            if (file.delete()) {
-                System.out.println("file Deleted :" + file.getAbsolutePath());
-                //TODO
-                //mFilesInDir
-                for (int i = 0; i < mFilesInDir.size(); i++) {
-                    if (mFilesInDir.get(i).getName().equals(file.getName())) {
-                        mFilesInDir.remove(i);
-                    }
-                }
-                displayedList.remove(position);
-            } else {
-                System.out.println("file not Deleted :" + file.getAbsolutePath());
-            }
+            recursiveDelete(file);
+            refreshLists(mSelectedDir);
         }
         recyclerView.getAdapter().notifyDataSetChanged();
     }
@@ -719,13 +667,6 @@ public class ManagerFragment extends Fragment {
         return (file != null && file.canWrite());
     }
 
-    /**
-     * Change the directory that is currently being displayed.
-     *
-     * @param dir The file the activity should switch to. This File must be
-     *            non-null and a directory, otherwise the displayed directory
-     *            will not be changed
-     */
     private void changeDirectory(final File dir) {
         Log.d(MainActivity.TAG, "changeDirectory");
         if (dir == null) {
@@ -758,7 +699,8 @@ public class ManagerFragment extends Fragment {
             } else {
                 Log.d(MainActivity.TAG, "target");
                 Intent target = new Intent(Intent.ACTION_VIEW);
-                Uri targetUri = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".fileprovider", dir);
+                Uri targetUri = FileProvider.getUriForFile(getActivity(), getActivity()
+                        .getApplicationContext().getPackageName() + ".fileprovider", dir);
                 Log.d(MainActivity.TAG, "data = " + targetUri.toString());
                 target.setDataAndType(targetUri, mimeType);
                 target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -780,30 +722,79 @@ public class ManagerFragment extends Fragment {
             }
         } else {
             sortWay = 0;
-            searchString = "";
-            final File[] contents = dir.listFiles();
             String path1 = dir.getAbsolutePath();
             String path2 = path1.replace("/", " > ");
             directoryTextView.setText(path2);
-            if (contents != null) {
-                int numDirectories = 0;
-                for (final File f : contents) {
-                    numDirectories++;
-                }
-                mFilesInDir.clear();
-                for (int i = 0, counter = 0; i < numDirectories; counter++) {
-                    mFilesInDir.add(contents[counter]);
-                    i++;
-                }
-                displayedList.clear();
-                displayedList.addAll(mFilesInDir);
-                mSelectedDir = dir;
-                sortFiles(sortWay);
-                //recyclerView.getAdapter().notifyDataSetChanged();
-                //debug("Changed directory to %s", dir.getAbsolutePath());
-            }
+            refreshLists(dir);
+            mSelectedDir = dir;
         }
     }
+
+    private void refreshLists(File dir) {
+        searchString = "";
+        final File[] contents = dir.listFiles();
+        if (contents != null) {
+            int numDirectories = 0;
+            for (final File f : contents) {
+                numDirectories++;
+            }
+            mFilesInDir.clear();
+            for (int i = 0, counter = 0; i < numDirectories; counter++) {
+                mFilesInDir.add(contents[counter]);
+                i++;
+            }
+            displayedList.clear();
+            displayedList.addAll(mFilesInDir);
+            sortFiles(sortWay);
+        }
+    }
+
+
+    // RUNTIME PERMISSION METHODS
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //Log.d(MainActivity.TAG, "ExplorerFragment onRequestPermissionsResult");
+        if (requestCode == MY_PERMISSIONS_REQUEST) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                setInitialDir();
+                changeDirectory(initialDir);
+            }
+            //TODO
+        }
+    }
+
+    private boolean hasPermissions() {
+        //Log.d(MainActivity.TAG, "ExplorerFragment hasPermissions");
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else return false;
+    }
+
+    private void requestPerms() {
+        //Log.d(MainActivity.TAG, "ExplorerFragment requestPerms");
+        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                MY_PERMISSIONS_REQUEST);
+    }
+
+/*    public void requestPermissionWithRationale(View view) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            final String message = "Storage permission is needed to show files";
+            Snackbar.make(view, message, Snackbar.LENGTH_LONG)
+                    .setAction("GRANT", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            requestPerms();
+                        }
+                    })
+                    .show();
+        } else {
+            requestPerms();
+        }
+    }*/
 
     public class SimpleDividerItemDecoration extends RecyclerView.ItemDecoration {
         private Drawable mDivider;
@@ -832,4 +823,6 @@ public class ManagerFragment extends Fragment {
         }
     }
 }
+
+
 

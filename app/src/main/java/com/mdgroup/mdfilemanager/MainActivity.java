@@ -24,30 +24,27 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     private ManagerFragment managerFragment;
     private AboutFragment aboutFragment;
     private Toolbar toolbarTop;
-    private ImageView iconToolbarImageView;
-    private TextView toolbarTitleTextView;
+    private Toolbar searchToolbar;
+    private Menu mainMenu;
+    //private ImageView iconToolbarImageView;
+    //private TextView toolbarTitleTextView;
+    private android.support.v7.widget.SearchView mainSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "MainActivity onCreate");
-
-/*        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setBackgroundDrawable(
-                new ColorDrawable(android.graphics.Color.TRANSPARENT));*/
-
-//You need to use a Theme.AppCompat theme (or descendant) with this activity
-
         setContentView(R.layout.activity_main);
-
-        Log.d(TAG, "MainActivity setContentView");
+        //Log.d(TAG, "MainActivity setContentView");
 
         toolbarTop = (Toolbar) findViewById(R.id.mainToolbar);
+
+        //iconToolbarImageView = toolbarTop.findViewById(R.id.iconToolbarImageView);
+        //toolbarTitleTextView = toolbarTop.findViewById(R.id.toolbarTitleTextView);
+        //toolbarTitleTextView.setVisibility(View.GONE);
+
         setSupportActionBar(toolbarTop);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        iconToolbarImageView = toolbarTop.findViewById(R.id.iconToolbarImageView);
-        toolbarTitleTextView = toolbarTop.findViewById(R.id.toolbarTitleTextView);
 
         managerFragment = new ManagerFragment();
         managerFragment.setListener(this);
@@ -65,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu1, menu);
+        mainMenu = menu;
         createSearch(menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -84,14 +82,42 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                 break;
             case R.id.menu_search:
                 break;
+            case R.id.menu_paste:
+                setPasteIconState(false);
+                if (managerFragment != null) {
+                    managerFragment.pasteFileIntoCurrentDirectory();
+                }
+                break;
+            case R.id.new_folder:
+                if (managerFragment != null) {
+                    managerFragment.createNewFolder();
+                }
+                break;
+            case R.id.new_file:
+                break;
+            case R.id.menu_settings:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    public void setPasteIconState (boolean visible) {
+        MenuItem menuPaste = mainMenu.findItem(R.id.menu_paste);
+        menuPaste.setVisible(visible);
+    }
+
     private void createSearch(Menu menu) {
-        //final MenuItem menuRemote = menu.findItem(R.id.menu_remote);
         final MenuItem menuSort = menu.findItem(R.id.menu_sort);
+        final MenuItem menuInfo = menu.findItem(R.id.menu_info);
         final MenuItem menuSearch = menu.findItem(R.id.menu_search);
+        final MenuItem menuPaste = menu.findItem(R.id.menu_paste);
+        final MenuItem newFolder = menu.findItem(R.id.new_folder);
+        final MenuItem newFile = menu.findItem(R.id.new_file);
+        final MenuItem menuSettings = menu.findItem(R.id.menu_settings);
+
+
+        menuPaste.setVisible(false);
+
         final SearchView searchView = (SearchView) menuSearch.getActionView();
         int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
         ImageView v = (ImageView) searchView.findViewById(searchImgId);
@@ -117,10 +143,12 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                iconToolbarImageView.setVisibility(View.GONE);
-                toolbarTitleTextView.setVisibility(View.GONE);
+                //iconToolbarImageView.setVisibility(View.GONE);
+                //toolbarTitleTextView.setVisibility(View.GONE);
                 //menuRemote.setVisible(false);
                 menuSort.setVisible(false);
+                menuInfo.setVisible(false);
+                newFolder.setVisible(false);
                 //Set cursor in searchView
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();
@@ -131,10 +159,12 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
             @Override
             public boolean onClose() {
                 Log.d(TAG, "MainActivity OnCloseListener");
-                iconToolbarImageView.setVisibility(View.VISIBLE);
-                toolbarTitleTextView.setVisibility(View.VISIBLE);
+                //iconToolbarImageView.setVisibility(View.VISIBLE);
+                //toolbarTitleTextView.setVisibility(View.VISIBLE);
                 //menuRemote.setVisible(true);
                 menuSort.setVisible(true);
+                menuInfo.setVisible(true);
+                newFolder.setVisible(true);
                 if (managerFragment != null) {
                     managerFragment.unfilterList();
                 }

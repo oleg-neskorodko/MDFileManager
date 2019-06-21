@@ -8,8 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import java.io.File;
 import java.net.URLConnection;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -23,6 +26,8 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yy HH:mm");
     private SimpleDateFormat sdf2 = new SimpleDateFormat("dd.MM.yy");
     private SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm");
+    private DecimalFormat decimalFormat1 = new DecimalFormat("##.##");
+    private DecimalFormat decimalFormat2 = new DecimalFormat("##");
 
     public ManagerAdapter(Context context, ArrayList<File> objects) {
         this.context = context;
@@ -72,8 +77,8 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         holder.dateTextView.setText(sdf2.format(date));
         holder.timeTextView.setText(sdf3.format(date));
 
-        long size = getFolderSize(objects.get(position));
-        Log.d(MainActivity.TAG, "size = " + size);
+        double size = (double) getFileSize(objects.get(position));
+        //Log.d(MainActivity.TAG, "size = " + size);
         if (size >= 0) {
             String measure = context.getString(R.string.bytes);
             if (size >= 1024) {
@@ -88,9 +93,12 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
                     }
                 }
             }
-            holder.discSpaceTextView.setText(String.valueOf(size) + " " + measure);
+            if (size < 10) {
+                holder.discSpaceTextView.setText(decimalFormat1.format(size) + " " + measure);
+            } else {
+                holder.discSpaceTextView.setText(decimalFormat2.format(size) + " " + measure);
+            }
         } else holder.discSpaceTextView.setText("");
-
 
 
         if (objects.get(position).isDirectory()) {
@@ -104,6 +112,8 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
                 holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.video_player));
             } else if (mimeType.startsWith("audio")) {
                 holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.music));
+            } else if (mimeType.startsWith("text")) {
+                holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.text));
             } else {
                 holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.file));
             }
@@ -112,12 +122,10 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
 
 
     // WAY 1
-    private static long getFolderSize(File file) {
+    private static long getFileSize(File file) {
         long size = 0;
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                size += getFolderSize(child);
-            }
+            size = -1;
         } else {
             size = file.length();
         }
@@ -125,7 +133,20 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     }
 
     // WAY 2
-/*    private static long getFolderSize(File file) {
+/*    private static long getFileSize(File file) {
+        long size = 0;
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                size += getFileSize(child);
+            }
+        } else {
+            size = file.length();
+        }
+        return size;
+    }*/
+
+    // WAY 3
+/*    private static long getFileSize(File file) {
         long size = 0;
         if (file.isDirectory()) {
             for (File child : file.listFiles()) {

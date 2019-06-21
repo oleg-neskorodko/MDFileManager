@@ -22,7 +22,7 @@
             android:background="@color/colorBlack"
             android:minHeight="?attr/actionBarSize">
 
-            <LinearLayout
+<!--            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -43,8 +43,17 @@
                     android:textColor="@color/colorGray1"
                     android:textSize="14sp"
                     android:typeface="monospace"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    android:textStyle="bold" />-->
+
+<!--                <android.support.v7.widget.SearchView
+                    android:id="@+id/mainSearchView"
+                    style="@style/AppSearchViewStyle"
+                    app:iconifiedByDefault="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                </android.support.v7.widget.SearchView>-->
+
+<!--            </LinearLayout>-->
 
         </android.support.v7.widget.Toolbar>
 
