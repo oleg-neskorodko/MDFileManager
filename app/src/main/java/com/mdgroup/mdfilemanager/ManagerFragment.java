@@ -1,6 +1,7 @@
 package com.mdgroup.mdfilemanager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +27,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -498,36 +501,62 @@ public class ManagerFragment extends Fragment {
         alert.show();
     }
 
+    @SuppressLint("RestrictedApi")
     private void renameFile(final int position) {
+        Log.d(MainActivity.TAG, "renameFile");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
 
-        final EditText input = new EditText(getActivity());
-        input.setText(displayedList.get(position).getName());
+        final EditText inputEditText = new EditText(getActivity());
+        File file = displayedList.get(position);
+        final String initialName = file.getName();
+        inputEditText.setText(initialName);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         lp.setMargins(0, 80, 0, 80);
-        input.setLayoutParams(lp);
+        inputEditText.setLayoutParams(lp);
+        //inputEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
+        if (file.isDirectory()) {
+            inputEditText.setSelection(initialName.length());
+        } else if (initialName.contains(".")) {
+            inputEditText.setSelection(initialName.lastIndexOf("."));
+        } else {
+            inputEditText.setSelection(initialName.length());
+        }
 
         builder.setTitle(getActivity().getResources().getString(R.string.insert_new_name))
-                .setCancelable(true)
+                .setCancelable(false)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
+                        inputEditText.clearFocus();
                         dialog.dismiss();
                     }
                 })
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String newName = input.getText().toString();
+
+                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
+                        inputEditText.clearFocus();
+
+                        String newName = inputEditText.getText().toString();
                         for (int i = 0; i < mFilesInDir.size(); i++) {
                             if (mFilesInDir.get(i).getName().equals(newName)) {
-                                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.name_exists), Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                                renameFile(position);
-                                return;
+                                if (newName.equals(initialName)) {
+                                    dialog.dismiss();
+                                    refreshLists(mSelectedDir);
+                                    return;
+                                } else {
+                                    Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.name_exists), Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                    renameFile(position);
+                                    return;
+                                }
                             }
                         }
                         File newFile = new File(mSelectedDir.getAbsolutePath(), newName);
@@ -538,13 +567,16 @@ public class ManagerFragment extends Fragment {
                         }
                     }
                 });
-        builder.setView(input, 0 ,20, 0 , 20);
+        builder.setView(inputEditText, 0 ,20, 0 , 20);
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface arg0) {
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
                 alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInputFromWindow(inputEditText.getApplicationWindowToken(),
+                        InputMethodManager.SHOW_FORCED, 0);
             }
         });
         alert.show();
@@ -788,14 +820,10 @@ public class ManagerFragment extends Fragment {
                 List<ResolveInfo> activities = packageManager.queryIntentActivities(target, 0);
                 boolean isIntentSafe = activities.size() > 0;
                 Log.d(MainActivity.TAG, "isIntentSafe = " + isIntentSafe);
-
-                if (isIntentSafe) {
-                    Log.d(MainActivity.TAG, "isIntentSafe true");
-                    startActivity(target);
-                } else {
-                    Log.d(MainActivity.TAG, "isIntentSafe false");
-                    Toast.makeText(getActivity(), "no such app", Toast.LENGTH_SHORT).show();
+                if (!isIntentSafe) {
+                    target.setDataAndType(targetUri, "*/*");
                 }
+                startActivity(target);
             }
         } else {
             sortWay = 0;
