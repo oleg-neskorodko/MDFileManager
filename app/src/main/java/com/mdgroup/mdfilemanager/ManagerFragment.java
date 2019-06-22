@@ -354,6 +354,40 @@ public class ManagerFragment extends Fragment {
         }
     }
 
+    public void createNewDocument() {
+        Log.d(MainActivity.TAG, "createNewFile");
+        String fileExtension = ".txt";
+        String initialName = getActivity().getResources().getString(R.string.new_file_name);
+        String suggestedName = initialName;
+        int number = 1;
+        for (int j = 0; j < 1000; j++) {
+            String startLoopName = suggestedName;
+            for (int i = 0; i < mFilesInDir.size(); i++) {
+                if ((suggestedName + fileExtension).equals(mFilesInDir.get(i).getName())) {
+                    number++;
+                    suggestedName = initialName.concat(String.valueOf(number));
+                    break;
+                }
+            }
+            if (suggestedName.equals(startLoopName)) {
+                break;
+            }
+        }
+        File newFile = new File(mSelectedDir, suggestedName + fileExtension);
+        try {
+            if (newFile.createNewFile()) {
+                mFilesInDir.add(newFile);
+                displayedList.clear();
+                displayedList.addAll(mFilesInDir);
+                recyclerView.getAdapter().notifyDataSetChanged();
+            } else {
+                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.no_file_created), Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void makeDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
         builder.setTitle(R.string.choose);
@@ -465,7 +499,6 @@ public class ManagerFragment extends Fragment {
     }
 
     private void renameFile(final int position) {
-        Log.d(MainActivity.TAG, "new dialog = " + mFilesInDir.size());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
 
         final EditText input = new EditText(getActivity());
@@ -473,7 +506,9 @@ public class ManagerFragment extends Fragment {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.setMargins(0, 80, 0, 80);
         input.setLayoutParams(lp);
+
 
         builder.setTitle(getActivity().getResources().getString(R.string.insert_new_name))
                 .setCancelable(true)
@@ -487,6 +522,14 @@ public class ManagerFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String newName = input.getText().toString();
+                        for (int i = 0; i < mFilesInDir.size(); i++) {
+                            if (mFilesInDir.get(i).getName().equals(newName)) {
+                                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.name_exists), Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                                renameFile(position);
+                                return;
+                            }
+                        }
                         File newFile = new File(mSelectedDir.getAbsolutePath(), newName);
                         Log.d(MainActivity.TAG, "path = " + mSelectedDir.getAbsolutePath());
                         boolean renameSuccessful = displayedList.get(position).renameTo(newFile);
@@ -495,7 +538,7 @@ public class ManagerFragment extends Fragment {
                         }
                     }
                 });
-        builder.setView(input);
+        builder.setView(input, 0 ,20, 0 , 20);
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -626,12 +669,14 @@ public class ManagerFragment extends Fragment {
             }
             if (file.delete()) {
                 Log.d(MainActivity.TAG, "file Deleted :" + file.getAbsolutePath());
+                refreshLists(mSelectedDir);
             } else {
                 Log.d(MainActivity.TAG, "file not Deleted :" + file.getAbsolutePath());
             }
         } else {
             if (file.delete()) {
                 Log.d(MainActivity.TAG, "file Deleted :" + file.getAbsolutePath());
+                refreshLists(mSelectedDir);
             } else {
                 Log.d(MainActivity.TAG, "file not Deleted :" + file.getAbsolutePath());
             }
@@ -643,20 +688,51 @@ public class ManagerFragment extends Fragment {
         Log.d(MainActivity.TAG, "deleteFile");
         File file = new File(path);
         if (file.exists()) {
-            recursiveDelete(file);
-            refreshLists(mSelectedDir);
+            //recursiveDelete(file);
+            //refreshLists(mSelectedDir);
+            confirmDialog(file);
         }
     }
 
     //overloaded method
     public void deleteFile(int position) {
         Log.d(MainActivity.TAG, "deleteFile");
+
         File file = displayedList.get(position);
         if (file.exists()) {
-            recursiveDelete(file);
-            refreshLists(mSelectedDir);
+            //recursiveDelete(file);
+            //refreshLists(mSelectedDir);
+            confirmDialog(file);
         }
-        recyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    private void confirmDialog(final File file) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
+        builder.setTitle(getActivity().getResources().getString(R.string.are_you_sure))
+                .setCancelable(true)
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        recursiveDelete(file);
+                        dialog.dismiss();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+                alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
+            }
+        });
+        alert.show();
     }
 
     private static void debug(final String message, final Object... args) {
@@ -692,7 +768,8 @@ public class ManagerFragment extends Fragment {
             }
             else */
             if (mimeType.startsWith("text") && !mimeType.equals("text/html")) {
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                //Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                Intent intent = new Intent(getActivity(), EditorActivity.class);
                 intent.putExtra("uri", dir.getAbsolutePath());
                 intent.putExtra("type", "text");
                 startActivity(intent);

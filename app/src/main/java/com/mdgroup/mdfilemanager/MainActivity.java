@@ -94,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                 }
                 break;
             case R.id.new_file:
+                if (managerFragment != null) {
+                    managerFragment.createNewDocument();
+                }
                 break;
             case R.id.menu_settings:
                 break;
