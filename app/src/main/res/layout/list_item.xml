@@ -7,14 +7,14 @@
     android:layout_marginBottom="15dp"
     android:layout_height="wrap_content">
 
-    ImageView
-        android:id="@+id/icon"
+    <ImageView
+        android:id="@+id/iconImageView"
         android:src="@drawable/file"
         android:tint="@color/colorIcon2"
         android:layout_marginLeft="10dp"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_gravity="left|center_vertical"
+        android:layout_gravity="left|center_vertical"/>
 
     <TextView
         android:id="@+id/titleTextView"
@@ -29,10 +29,6 @@
         android:textSize="18sp"
         android:typeface="monospace"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
 
-    ImageView
-        android:src="@drawable/icon"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
 </LinearLayout>

@@ -39,4 +39,5 @@
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="name_exists">name you inserted already exists</string>
+    <string name="such_name_exists">The file/directory with such name already exists</string>
 </resources>

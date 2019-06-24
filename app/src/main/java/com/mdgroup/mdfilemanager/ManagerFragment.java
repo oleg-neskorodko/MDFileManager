@@ -41,6 +41,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -216,7 +218,7 @@ public class ManagerFragment extends Fragment {
 
             ViewHolder holder;
             class ViewHolder {
-                ImageView icon;
+                ImageView iconImageView;
                 TextView titleTextView;
             }
 
@@ -228,7 +230,7 @@ public class ManagerFragment extends Fragment {
                     convertView = inflater.inflate(R.layout.list_item, null);
 
                     holder = new ViewHolder();
-                    //holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
                     holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
                     convertView.setTag(holder);
                 } else {
@@ -237,7 +239,7 @@ public class ManagerFragment extends Fragment {
                 }
 
                 holder.titleTextView.setText(sortDialogItems[position]);
-                //holder.icon.setVisibility(View.GONE);
+                holder.iconImageView.setVisibility(View.GONE);
                 return convertView;
             }
         };
@@ -414,7 +416,7 @@ public class ManagerFragment extends Fragment {
 
             ViewHolder holder;
             class ViewHolder {
-                //ImageView icon;
+                ImageView iconImageView;
                 TextView titleTextView;
             }
 
@@ -427,7 +429,7 @@ public class ManagerFragment extends Fragment {
                     Log.d(MainActivity.TAG, "convertView null");
 
                     holder = new ViewHolder();
-                    //holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                    holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
                     holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
                     convertView.setTag(holder);
                 } else {
@@ -437,7 +439,7 @@ public class ManagerFragment extends Fragment {
                 }
 
                 holder.titleTextView.setText(dialogItems[position]);
-                //holder.icon.setImageResource(icons[position]);
+                holder.iconImageView.setImageResource(icons[position]);
                 Log.d(MainActivity.TAG, "adapter ready");
                 return convertView;
             }
@@ -454,6 +456,7 @@ public class ManagerFragment extends Fragment {
                         cutFile = false;
                         break;
                     case 1:
+                        Log.d(MainActivity.TAG, "paste, cutFile = " + cutFile);
                         if (bufferedFilePath.equals("")) {
                             Toast.makeText(getActivity(), "no file to paste", Toast.LENGTH_SHORT).show();
                             break;
@@ -464,9 +467,9 @@ public class ManagerFragment extends Fragment {
                         }
                         Log.d(MainActivity.TAG, "paste");
                         listener.setPasteIconState(false);
-                        if (cutFile) {
-                            copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
-                            deleteFile(bufferedFilePath);
+                        if (cutFile && copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath())) {
+                            Log.d(MainActivity.TAG, "cutFile true");
+                            deleteFile(bufferedFilePath, false);
                             bufferedFilePath = "";
                         } else {
                             copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
@@ -481,7 +484,7 @@ public class ManagerFragment extends Fragment {
                         break;
                     case 3:
                         Log.d(MainActivity.TAG, "delete");
-                        deleteFile(position);
+                        deleteFile(position, true);
                         break;
                     case 4:
                         Log.d(MainActivity.TAG, "rename");
@@ -499,6 +502,14 @@ public class ManagerFragment extends Fragment {
             }
         });
         alert.show();
+    }
+
+    public void pasteFileIntoCurrentDirectory() {
+        if (cutFile & copyFileOrDirectory(bufferedFilePath, mSelectedDir.getAbsolutePath())) {
+            deleteFile(bufferedFilePath, false);
+        }
+        bufferedFilePath = "";
+        refreshLists(mSelectedDir);
     }
 
     @SuppressLint("RestrictedApi")
@@ -605,91 +616,46 @@ public class ManagerFragment extends Fragment {
         bufferedFilePath = displayedList.get(position).getAbsolutePath();
     }
 
-    public void pasteFileIntoCurrentDirectory() {
-        copyFileOrDirectory(bufferedFilePath, mSelectedDir.getAbsolutePath());
-        refreshLists(mSelectedDir);
-    }
-
-    public void copyFileOrDirectory(String srcDir, String dstDir) {
-        Log.d(MainActivity.TAG, "copyFileOrDirectory ");
-
+    public boolean copyFileOrDirectory(String srcDir, String dstDir) {
+        Log.d(MainActivity.TAG, "copyFileOrDirectory :" + srcDir + " / " + dstDir);
+        File src = new File(srcDir);
+        File dstDirectory = new File(dstDir);
+        File[] dstDirFiles = dstDirectory.listFiles();
+        for (int i = 0; i < dstDirFiles.length; i++) {
+            if (dstDirFiles[i].getName().equals(src.getName())) {
+                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.such_name_exists), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        File dst = new File(dstDir, src.getName());
         try {
-            File src = new File(srcDir);
-
-/*            File dstDirectory = new File(dstDir);
-            File[] dstDirFiles = dstDirectory.listFiles();
-            Log.d(MainActivity.TAG, "here " + srcDir + " / " + dstDir);
-
-            String initialName = src.getName();
-            String suggestedName = initialName;
-            int number = 0;
-            for (int j = 0; j < 1000; j++) {
-                String startLoopName = suggestedName;
-                for (int i = 0; i < dstDirFiles.length; i++) {
-                    if (suggestedName.equals(dstDirFiles[i].getName())) {
-                        number++;
-                        suggestedName = initialName + " - copy" + number;
-                        break;
-                    }
-                }
-                if (suggestedName.equals(startLoopName)) {
-                    break;
-                }
-            }
-            Log.d(MainActivity.TAG, "here2 " + suggestedName);
-            File dst = new File(dstDir, suggestedName);*/
-
-            File dst = new File(dstDir, src.getName());
-
-            if (src.isDirectory()) {
-
-                String files[] = src.list();
-                if (files.length == 0) {
-                    copyFile(src, dst);
-                } else {
-                    int filesLength = files.length;
-                    for (int i = 0; i < filesLength; i++) {
-                        String src1 = (new File(src, files[i]).getPath());
-                        String dst1 = dst.getPath();
-                        copyFileOrDirectory(src1, dst1);
-                    }
-                }
-            } else {
-                Log.d(MainActivity.TAG, "copyFile launch ");
-                copyFile(src, dst);
-            }
-        } catch (Exception e) {
+            copyItem(src, dst);
+        } catch (IOException e) {
             e.printStackTrace();
-            Log.d(MainActivity.TAG, "Exception " + e.toString());
         }
+        return true;
     }
 
-    public static void copyFile(File sourceFile, File destFile) throws IOException {
-        Log.d(MainActivity.TAG, "copyFile " + sourceFile.getName() + " " + destFile.getName());
-        if (!destFile.getParentFile().exists())
-            destFile.getParentFile().mkdirs();
-
-        if (!destFile.exists()) {
-            destFile.createNewFile();
-        }
-/*        if (sourceFile.isDirectory()) {
-            destFile.mkdir();
-        }*/
-
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-        } finally {
-            if (source != null) {
-                source.close();
+    public void copyItem(File src, File dst) throws IOException{
+        if (src.isDirectory()) {
+            if (!dst.exists()) {
+                dst.mkdir();
             }
-            if (destination != null) {
-                destination.close();
+
+            String[] children = src.list();
+            for (int i = 0; i < src.listFiles().length; i++) {
+                copyItem(new File(src, children[i]), new File(dst, children[i]));
             }
+        } else {
+            InputStream in = new FileInputStream(src);
+            OutputStream out = new FileOutputStream(dst);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
         }
     }
 
@@ -716,25 +682,33 @@ public class ManagerFragment extends Fragment {
     }
 
     //overloaded method
-    public void deleteFile(String path) {
+    public void deleteFile(String path, boolean showDialog) {
         Log.d(MainActivity.TAG, "deleteFile");
         File file = new File(path);
         if (file.exists()) {
             //recursiveDelete(file);
             //refreshLists(mSelectedDir);
-            confirmDialog(file);
+            if (showDialog) {
+                confirmDialog(file);
+            } else {
+                recursiveDelete(file);
+            }
         }
     }
 
     //overloaded method
-    public void deleteFile(int position) {
+    public void deleteFile(int position, boolean showDialog) {
         Log.d(MainActivity.TAG, "deleteFile");
 
         File file = displayedList.get(position);
         if (file.exists()) {
             //recursiveDelete(file);
             //refreshLists(mSelectedDir);
-            confirmDialog(file);
+            if (showDialog) {
+                confirmDialog(file);
+            } else {
+                recursiveDelete(file);
+            }
         }
     }
 
