@@ -1,34 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginTop="15dp"
     android:layout_marginBottom="15dp"
-    android:layout_height="wrap_content">
+    android:paddingLeft="10dp"
+    android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/iconImageView"
-        android:src="@drawable/file"
-        android:tint="@color/colorIcon2"
-        android:layout_marginLeft="10dp"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_gravity="left|center_vertical"/>
+        android:layout_gravity="left|center_vertical"
+        android:tint="@color/colorIcon2" />
+
+    <TextView
+        android:id="@+id/leftSymbolTextView"
+        style="@style/MainText"
+        android:textColor="@color/colorIcon2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:text="A" />
+
+    <TextView
+        android:id="@+id/rightSymbolTextView"
+        style="@style/MainText"
+        android:textColor="@color/colorIcon2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:text="Z" />
 
     <TextView
         android:id="@+id/titleTextView"
-        android:text=""
+        style="@style/MainText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_vertical"
         android:paddingLeft="10dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:layout_gravity="center"
-        android:gravity="center_vertical"
-        android:textColor="@color/colorGreen1"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:typeface="monospace"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:text="" />
 
 </LinearLayout>

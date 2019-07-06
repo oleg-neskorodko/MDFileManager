@@ -2,11 +2,16 @@ package com.mdgroup.mdfilemanager;
 
 import android.content.ClipData;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,21 +19,35 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements FragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements FragmentInteractionListener {
 
     public static String TAG = "tag";
     private ManagerFragment managerFragment;
     private AboutFragment aboutFragment;
     private Toolbar toolbarTop;
-    private Toolbar searchToolbar;
-    private Menu mainMenu;
-    //private ImageView iconToolbarImageView;
-    //private TextView toolbarTitleTextView;
-    private android.support.v7.widget.SearchView mainSearchView;
+    private SearchView mainSearchView;
+
+    private ImageView pasteMainImageView;
+    private ImageView sortMainImageView;
+    private ImageView searchMainImageView;
+    private ImageView folderMainImageView;
+    private ImageView fileMainImageView;
+    private ImageView infoMainImageView;
+    private TextView nameMainTextView;
+    private TextView versionMainTextView;
+    private ImageView[] toolbarIcon;
+    private String[] menuNames;
+    private String[] overflowMenuNames;
+    private int[] menuIndexes;
+    private int[] overflowMenuIndex;
+    private MenuItem[] menuItems;
+    private boolean pasteIconShown;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +56,124 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         setContentView(R.layout.activity_main);
         //Log.d(TAG, "MainActivity setContentView");
 
+        menuNames = getResources().getStringArray(R.array.menu_items);
+        menuIndexes = new int[]{0, 1, 2, 3, 4, 5};
+        pasteIconShown = false;
+
         toolbarTop = (Toolbar) findViewById(R.id.mainToolbar);
 
-        //iconToolbarImageView = toolbarTop.findViewById(R.id.iconToolbarImageView);
-        //toolbarTitleTextView = toolbarTop.findViewById(R.id.toolbarTitleTextView);
-        //toolbarTitleTextView.setVisibility(View.GONE);
+        mainSearchView = toolbarTop.findViewById(R.id.mainSearchView);
+        pasteMainImageView = toolbarTop.findViewById(R.id.pasteMainImageView);
+        sortMainImageView = toolbarTop.findViewById(R.id.sortMainImageView);
+        searchMainImageView = toolbarTop.findViewById(R.id.searchMainImageView);
+        folderMainImageView = toolbarTop.findViewById(R.id.folderMainImageView);
+        fileMainImageView = toolbarTop.findViewById(R.id.fileMainImageView);
+        infoMainImageView = toolbarTop.findViewById(R.id.infoMainImageView);
+        nameMainTextView = toolbarTop.findViewById(R.id.nameMainTextView);
+        versionMainTextView = toolbarTop.findViewById(R.id.versionMainTextView);
+        toolbarIcon = new ImageView[]{pasteMainImageView, sortMainImageView, searchMainImageView, folderMainImageView,
+                fileMainImageView, infoMainImageView};
+
+        View.OnClickListener menuClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.pasteMainImageView:
+                        setPasteIconState(false);
+                        if (managerFragment != null) {
+                            managerFragment.pasteFileIntoCurrentDirectory();
+                        }
+                        break;
+                    case R.id.sortMainImageView:
+                        if (managerFragment != null) {
+                            managerFragment.onSortListPressed();
+                        }
+                        break;
+                    case R.id.searchMainImageView:
+                        showHideSearch(View.GONE, View.VISIBLE, false);
+                        break;
+                    case R.id.folderMainImageView:
+                        if (managerFragment != null) {
+                            managerFragment.createNewFolder();
+                        }
+                        break;
+                    case R.id.fileMainImageView:
+                        if (managerFragment != null) {
+                            managerFragment.createNewDocument();
+                        }
+                        break;
+                    case R.id.infoMainImageView:
+                        Log.d(TAG, "MainActivity infoMainImageView click");
+                        showHideInfoToolbar(View.GONE, View.VISIBLE, false);
+                        aboutFragment = new AboutFragment();
+                        aboutFragment.setListener(MainActivity.this);
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("main_stack").commit();
+                        break;
+                }
+            }
+        };
+
+        for (int i = 0; i < toolbarIcon.length; i++) {
+            toolbarIcon[i].setOnClickListener(menuClickListener);
+        }
+
+
+        mainSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (managerFragment != null) {
+                    managerFragment.filterList(newText);
+                }
+                return false;
+            }
+        });
+
+        mainSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                Log.d(TAG, "MainActivity OnCloseListener");
+                showHideSearch(View.VISIBLE, View.GONE, true);
+                if (managerFragment != null) {
+                    managerFragment.unfilterList();
+                }
+                return false;
+            }
+        });
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.widthPixels;
+        //RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) pasteMainImageView.getLayoutParams();
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) pasteMainImageView.getLayoutParams();
+        int iconWidth = pasteMainImageView.getLayoutParams().width + lp.rightMargin + lp.leftMargin;
+        Log.d(TAG, "MainActivity iconWidth = " + iconWidth + " , screen = " + screenWidth);
+
+        int iconNumber = (screenWidth - screenWidth % iconWidth) / iconWidth;
+        if (iconNumber < toolbarIcon.length) {
+            overflowMenuNames = new String[menuNames.length - iconNumber];
+            overflowMenuIndex = new int[menuIndexes.length - iconNumber];
+            for (int i = iconNumber; i < toolbarIcon.length; i++) {
+                toolbarIcon[i].setVisibility(View.GONE);
+                overflowMenuNames[i - iconNumber] = menuNames[i];
+                overflowMenuIndex[i - iconNumber] = menuIndexes[i];
+            }
+        }
+
+        Drawable source = getResources().getDrawable(R.drawable.overflow_menu);
+        Bitmap bitmap = ((BitmapDrawable) source).getBitmap();
+        Drawable drawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 40, 40, true));
+        drawable.setTint(getResources().getColor(R.color.colorWhite));
+        toolbarTop.setOverflowIcon(drawable);
+        pasteMainImageView.setVisibility(View.INVISIBLE);
+        mainSearchView.setVisibility(View.GONE);
+        nameMainTextView.setVisibility(View.GONE);
+        versionMainTextView.setVisibility(View.GONE);
 
         setSupportActionBar(toolbarTop);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -59,121 +191,117 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         Log.d(TAG, "MainActivity onCreate end");
     }
 
+    private void showHideSearch(int buttonsState, int searchState, boolean itemsVisible) {
+        for (int i = 0; i < toolbarIcon.length; i++) {
+            toolbarIcon[i].setVisibility(buttonsState);
+        }
+        if (menuItems != null) {
+            for (int i = 0; i < menuItems.length; i++) {
+                menuItems[i].setVisible(itemsVisible);
+            }
+        }
+        mainSearchView.setVisibility(searchState);
+        if (!itemsVisible) {
+            mainSearchView.setIconified(false);
+        }
+        if (itemsVisible && !pasteIconShown) {
+            pasteMainImageView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void showHideInfoToolbar(int buttonsState, int textState, boolean itemsVisible) {
+        for (int i = 0; i < toolbarIcon.length; i++) {
+            toolbarIcon[i].setVisibility(buttonsState);
+        }
+        if (menuItems != null) {
+            for (int i = 0; i < menuItems.length; i++) {
+                menuItems[i].setVisible(itemsVisible);
+            }
+        }
+        nameMainTextView.setVisibility(textState);
+        versionMainTextView.setVisibility(textState);
+        if (itemsVisible && !pasteIconShown) {
+            pasteMainImageView.setVisibility(View.INVISIBLE);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu1, menu);
-        mainMenu = menu;
-        createSearch(menu);
-        return super.onCreateOptionsMenu(menu);
+        if (overflowMenuNames != null && overflowMenuNames.length > 0) {
+            menuItems = new MenuItem[overflowMenuNames.length];
+            for (int i = 0; i < overflowMenuNames.length; i++) {
+                menuItems[i] = menu.add(Menu.NONE, overflowMenuIndex[i], i, overflowMenuNames[i]);
+            }
+        }
+
+        return true;
+        //getMenuInflater().inflate(R.menu.menu1, menu);
+        //mainMenu = menu;
+        //createSearch(menu);
+        //return super.onCreateOptionsMenu(menu);
     }
+
+/*    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item= menu.findItem(R.id.menu_settings);
+        item.setVisible(false);
+        super.onPrepareOptionsMenu(menu);
+        return true;
+    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.menu_info:
-                aboutFragment = new AboutFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("main_stack").commit();
-                break;
-            case R.id.menu_sort:
-                if (managerFragment != null) {
-                    managerFragment.onSortListPressed();
-                }
-                break;
-            case R.id.menu_search:
-                break;
-            case R.id.menu_paste:
+            case 0:
                 setPasteIconState(false);
                 if (managerFragment != null) {
                     managerFragment.pasteFileIntoCurrentDirectory();
                 }
                 break;
-            case R.id.new_folder:
+            case 1:
+                if (managerFragment != null) {
+                    managerFragment.onSortListPressed();
+                }
+                break;
+            case 2:
+                showHideSearch(View.GONE, View.VISIBLE, false);
+                break;
+            case 3:
                 if (managerFragment != null) {
                     managerFragment.createNewFolder();
                 }
                 break;
-            case R.id.new_file:
+            case 4:
                 if (managerFragment != null) {
                     managerFragment.createNewDocument();
                 }
                 break;
-            case R.id.menu_settings:
+            case 5:
+                showHideInfoToolbar(View.GONE, View.VISIBLE, false);
+                aboutFragment = new AboutFragment();
+                aboutFragment.setListener(MainActivity.this);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("main_stack").commit();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void setPasteIconState (boolean visible) {
-        MenuItem menuPaste = mainMenu.findItem(R.id.menu_paste);
-        menuPaste.setVisible(visible);
+    public void setPasteIconState(boolean visible) {
+        if (visible) {
+            pasteMainImageView.setVisibility(View.VISIBLE);
+            pasteIconShown = true;
+        } else {
+            pasteMainImageView.setVisibility(View.INVISIBLE);
+            pasteIconShown = false;
+        }
     }
 
-    private void createSearch(Menu menu) {
-        final MenuItem menuSort = menu.findItem(R.id.menu_sort);
-        final MenuItem menuInfo = menu.findItem(R.id.menu_info);
-        final MenuItem menuSearch = menu.findItem(R.id.menu_search);
-        final MenuItem menuPaste = menu.findItem(R.id.menu_paste);
-        final MenuItem newFolder = menu.findItem(R.id.new_folder);
-        final MenuItem newFile = menu.findItem(R.id.new_file);
-        final MenuItem menuSettings = menu.findItem(R.id.menu_settings);
-
-
-        menuPaste.setVisible(false);
-
-        final SearchView searchView = (SearchView) menuSearch.getActionView();
-        int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
-        ImageView v = (ImageView) searchView.findViewById(searchImgId);
-        v.setImageResource(R.drawable.search_bitmap);
-
-        menuSearch.setIcon(getResources().getDrawable(R.drawable.search));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (managerFragment != null) {
-                    managerFragment.filterList(newText);
-                }
-                return false;
-            }
-        });
-
-        searchView.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //iconToolbarImageView.setVisibility(View.GONE);
-                //toolbarTitleTextView.setVisibility(View.GONE);
-                //menuRemote.setVisible(false);
-                menuSort.setVisible(false);
-                menuInfo.setVisible(false);
-                newFolder.setVisible(false);
-                //Set cursor in searchView
-                searchView.setFocusable(true);
-                searchView.requestFocusFromTouch();
-            }
-        });
-
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                Log.d(TAG, "MainActivity OnCloseListener");
-                //iconToolbarImageView.setVisibility(View.VISIBLE);
-                //toolbarTitleTextView.setVisibility(View.VISIBLE);
-                //menuRemote.setVisible(true);
-                menuSort.setVisible(true);
-                menuInfo.setVisible(true);
-                newFolder.setVisible(true);
-                if (managerFragment != null) {
-                    managerFragment.unfilterList();
-                }
-                return false;
-            }
-        });
+    @Override
+    public void onInfoClose() {
+        Log.d(TAG, "MainActivity onInfoClose");
+        showHideInfoToolbar(View.VISIBLE, View.GONE, true);
     }
 
     @Override
@@ -192,5 +320,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         Log.d(TAG, "MainActivity onFinishApp");
         finish();
     }
+
+
 }
 

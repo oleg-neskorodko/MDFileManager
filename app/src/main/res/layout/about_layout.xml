@@ -1,7 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
+<!--
+    <TextView
+        android:id="@+id/nameAboutTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/info_name"
+        style="@style/MainText"/>
+
+    <TextView
+        android:id="@+id/versionAboutTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:text="@string/info_version"
+        style="@style/MainText"/>-->
+
+    <TextView
+        android:id="@+id/thanksAboutTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="left"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/info_thanks"
+        style="@style/MainText"/>
 
     <TextView
         android:id="@+id/infoAboutTextView"
@@ -10,7 +44,9 @@
         android:layout_gravity="center_vertical"
         android:gravity="left"
         android:paddingLeft="10dp"
-        android:text="@string/about_us"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/info_about_us"
         style="@style/MainText"/>
 
     <TextView
@@ -20,13 +56,43 @@
         android:layout_gravity="center_vertical"
         android:gravity="left"
         android:paddingLeft="10dp"
-        android:text="@string/rate_us"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/info_rate"
         style="@style/MainText"/>
 
     <Button
         android:id="@+id/rateAboutButton"
-        android:text="@string/rate"
+        android:typeface="monospace"
+        android:textStyle="bold"
+        android:text="@string/info_rate_button"
+        android:layout_marginBottom="5dp"
+        android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/offersAboutTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="left"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/info_offers"
+        style="@style/MainText"/>
+
+    <TextView
+        android:id="@+id/contactsAboutTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="left"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/info_contacts"
+        style="@style/MainText"/>
 
 </LinearLayout>

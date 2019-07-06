@@ -22,39 +22,114 @@
             android:background="@color/colorBlack"
             android:minHeight="?attr/actionBarSize">
 
-<!--            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <ImageView
-                    android:id="@+id/iconToolbarImageView"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:src="@drawable/icon" />
+                    android:id="@+id/pasteMainImageView"
+                    android:tint="@color/colorWhite"
+                    android:layout_width="40dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/paste3" />
 
-                <TextView
-                    android:id="@+id/toolbarTitleTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:paddingLeft="5dp"
-                    android:text="@string/toolbar_name"
-                    android:textColor="@color/colorGray1"
-                    android:textSize="14sp"
-                    android:typeface="monospace"
-                    android:textStyle="bold" />-->
+                <Space
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp" />
 
-<!--                <android.support.v7.widget.SearchView
+                <ImageView
+                    android:id="@+id/sortMainImageView"
+                    android:tint="@color/colorWhite"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/sort" />
+
+                <Space
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp" />
+
+                <ImageView
+                    android:id="@+id/searchMainImageView"
+                    android:tint="@color/colorWhite"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/search" />
+
+                <Space
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp" />
+
+                <ImageView
+                    android:id="@+id/folderMainImageView"
+                    android:tint="@color/colorWhite"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/new_folder3" />
+
+                <Space
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp" />
+
+                <ImageView
+                    android:id="@+id/fileMainImageView"
+                    android:tint="@color/colorWhite"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/new_file3" />
+
+                <Space
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp" />
+
+                <ImageView
+                    android:id="@+id/infoMainImageView"
+                    android:tint="@color/colorWhite"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/info4" />
+
+                <SearchView
                     android:id="@+id/mainSearchView"
-                    style="@style/AppSearchViewStyle"
-                    app:iconifiedByDefault="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
-                </android.support.v7.widget.SearchView>-->
+                </SearchView>
 
-<!--            </LinearLayout>-->
+                <TextView
+                    android:id="@+id/nameMainTextView"
+                    android:text="@string/info_name"
+                    android:textStyle="bold"
+                    style="@style/ToolbarText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
+                <TextView
+                    android:id="@+id/versionMainTextView"
+                    android:text="@string/info_version"
+                    android:textStyle="bold"
+                    style="@style/ToolbarText"
+                    android:gravity="right"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
         <FrameLayout

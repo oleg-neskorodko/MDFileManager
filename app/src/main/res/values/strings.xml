@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MDFM</string>
     <string name="toolbar_name">MDFM</string>
+    <string name="info_name">MD File Manager</string>
     <string name="remote_access">Remote access</string>
     <string name="upload">Upload</string>
     <string name="cancel">Cancel</string>
@@ -17,9 +18,6 @@
     <string name="a_z">from A to Z</string>
     <string name="z_a">from Z to A</string>
     <string name="info">Info</string>
-    <string name="rate">Rate</string>
-    <string name="about_us">They call us MD Group</string>
-    <string name="rate_us">Please rate this app</string>
     <string name="rename">Rename</string>
     <string name="ok">OK</string>
     <string name="bytes">B</string>
@@ -38,6 +36,27 @@
     <string name="are_you_sure">Are you sure you want to delete this?</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
+    <string name="return_button">RETURN</string>
+    <string name="saving_changes">Do you want to save changes?</string>
     <string name="name_exists">name you inserted already exists</string>
     <string name="such_name_exists">The file/directory with such name already exists</string>
+    <string name="small_large">from smallest to largest</string>
+    <string name="large_small">from largest to smallest</string>
+    <string-array name="menu_items">
+        <item>Paste</item>
+        <item>Sort</item>
+        <item>Search</item>
+        <item>New folder</item>
+        <item>New file</item>
+        <item>Info</item>
+    </string-array>
+    <string name="info_version">v.1.0.1</string>
+    <string name="info_thanks">Thank you for using our app!</string>
+    <string name="info_about_us">We are MD Group - a team of mobile developers with the broad scope of competence.
+        We love to translate ideas into reality. That is why we are always open to something new.</string>
+    <string name="info_rate">Your feedback on our app will greatly help to make it better!</string>
+    <string name="info_rate_button">Rate the app</string>
+    <string name="info_offers">We are open to collaboration! If you have any ideas or offers please feel free to contact us:</string>
+    <string name="info_contacts">E-mail:</string>
+
 </resources>

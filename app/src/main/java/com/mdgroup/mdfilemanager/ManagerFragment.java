@@ -2,14 +2,13 @@ package com.mdgroup.mdfilemanager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -37,14 +36,16 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.URLConnection;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -117,7 +118,9 @@ public class ManagerFragment extends Fragment {
         sortDialogItems = new String[]{getActivity().getResources().getString(R.string.a_z),
                 getActivity().getResources().getString(R.string.z_a),
                 getActivity().getResources().getString(R.string.old_new),
-                getActivity().getResources().getString(R.string.new_old)};
+                getActivity().getResources().getString(R.string.new_old),
+                getActivity().getResources().getString(R.string.small_large),
+                getActivity().getResources().getString(R.string.large_small)};
 
 
         bufferedFilePath = "";
@@ -140,7 +143,7 @@ public class ManagerFragment extends Fragment {
                     int position = recyclerView.getChildAdapterPosition(v);
                     Log.d(MainActivity.TAG, "onClick position = " + position);
                     if (hasPermissions()) {
-                        changeDirectory(displayedList.get(position).getAbsoluteFile());
+                        onFileClick(displayedList.get(position).getAbsoluteFile());
                     }
                 } else longPressed = false;
             }
@@ -165,7 +168,7 @@ public class ManagerFragment extends Fragment {
             requestPerms();
         } else {
             setInitialDir();
-            changeDirectory(initialDir);
+            onFileClick(initialDir);
         }
         return v;
     }
@@ -214,12 +217,44 @@ public class ManagerFragment extends Fragment {
             }
         });
 
+        final int[] icons = {
+                R.drawable.a_z,
+                R.drawable.z_a,
+                R.drawable.old_new,
+                R.drawable.new_old,
+                R.drawable.small_large,
+                R.drawable.large_small
+        };
+
+        final String[] leftSymbols = {
+                "A",
+                "Z",
+                "\uD83D\uDD52",
+                "\uD83D\uDD57",
+                "\uD83D\uDDCB",
+                "\uD83D\uDDCB"
+        };
+
+        final String[] rightSymbols = {
+                "Z",
+                "A",
+                "",
+                "",
+                "\uD83D\uDDCB",
+                "\uD83D\uDDCB"
+        };
+
+        final int[] leftSymbolSizes = { 24, 24, 32, 32, 20, 28 };
+        final int[] rightSymbolSizes = { 24, 24, 8, 8, 28, 20 };
+
         ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, sortDialogItems) {
 
             ViewHolder holder;
             class ViewHolder {
                 ImageView iconImageView;
                 TextView titleTextView;
+                TextView leftSymbolTextView;
+                TextView rightSymbolTextView;
             }
 
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -232,6 +267,8 @@ public class ManagerFragment extends Fragment {
                     holder = new ViewHolder();
                     holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
                     holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
+                    holder.leftSymbolTextView = (TextView) convertView.findViewById(R.id.leftSymbolTextView);
+                    holder.rightSymbolTextView = (TextView) convertView.findViewById(R.id.rightSymbolTextView);
                     convertView.setTag(holder);
                 } else {
                     // view already defined, retrieve view holder
@@ -240,6 +277,19 @@ public class ManagerFragment extends Fragment {
 
                 holder.titleTextView.setText(sortDialogItems[position]);
                 holder.iconImageView.setVisibility(View.GONE);
+                //Picasso.get().load(icons[position]).into(holder.iconImageView);
+                //holder.iconImageView.setImageResource(icons[position]);
+                //holder.iconImageView.getLayoutParams().height = 50;
+                //holder.iconImageView.getLayoutParams().width = 50;
+
+                Typeface customFont = ResourcesCompat.getFont(getActivity(), R.font.symbola);
+                holder.leftSymbolTextView.setTypeface(customFont);
+                holder.rightSymbolTextView.setTypeface(customFont);
+                holder.leftSymbolTextView.setText(leftSymbols[position]);
+                holder.rightSymbolTextView.setText(rightSymbols[position]);
+                holder.leftSymbolTextView.setTextSize(leftSymbolSizes[position]);
+                holder.rightSymbolTextView.setTextSize(rightSymbolSizes[position]);
+
                 return convertView;
             }
         };
@@ -264,6 +314,14 @@ public class ManagerFragment extends Fragment {
                         Log.d(MainActivity.TAG, "new_old");
                         sortFiles(3);
                         break;
+                    case 4:
+                        Log.d(MainActivity.TAG, "small_large");
+                        sortFiles(4);
+                        break;
+                    case 5:
+                        Log.d(MainActivity.TAG, "large_small");
+                        sortFiles(5);
+                        break;
                 }
             }
         });
@@ -282,6 +340,7 @@ public class ManagerFragment extends Fragment {
         ArrayList<File> dirList = new ArrayList<>();
         ArrayList<File> fileList = new ArrayList<>();
         Comparator<File> comparator;
+        Comparator<File> letterComparator = null;
 
         for (int i = 0; i < mFilesInDir.size(); i++) {
             if (mFilesInDir.get(i).isDirectory()) {
@@ -298,8 +357,21 @@ public class ManagerFragment extends Fragment {
                     return Long.compare(o1.lastModified(), o2.lastModified());
                 }
             };
+        } else if (way == 0 || way == 1) {
+            comparator = new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            };
         } else {
             comparator = new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return Long.compare(o1.length(), o2.length());
+                }
+            };
+            letterComparator = new Comparator<File>() {
                 @Override
                 public int compare(File o1, File o2) {
                     return o1.getName().compareToIgnoreCase(o2.getName());
@@ -307,10 +379,9 @@ public class ManagerFragment extends Fragment {
             };
         }
 
-        Collections.sort(dirList, comparator);
+        Collections.sort(dirList, letterComparator);
         Collections.sort(fileList, comparator);
-        if (way == 1 || way == 3) {
-            Collections.reverse(dirList);
+        if (way == 1 || way == 3 || way == 5) {
             Collections.reverse(fileList);
         }
 
@@ -418,6 +489,8 @@ public class ManagerFragment extends Fragment {
             class ViewHolder {
                 ImageView iconImageView;
                 TextView titleTextView;
+                TextView leftSymbolTextView;
+                TextView rightSymbolTextView;
             }
 
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -431,6 +504,8 @@ public class ManagerFragment extends Fragment {
                     holder = new ViewHolder();
                     holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
                     holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
+                    holder.leftSymbolTextView = (TextView) convertView.findViewById(R.id.leftSymbolTextView);
+                    holder.rightSymbolTextView = (TextView) convertView.findViewById(R.id.rightSymbolTextView);
                     convertView.setTag(holder);
                 } else {
                     Log.d(MainActivity.TAG, "convertView defined");
@@ -439,6 +514,8 @@ public class ManagerFragment extends Fragment {
                 }
 
                 holder.titleTextView.setText(dialogItems[position]);
+                holder.leftSymbolTextView.setVisibility(View.GONE);
+                holder.rightSymbolTextView.setVisibility(View.GONE);
                 holder.iconImageView.setImageResource(icons[position]);
                 Log.d(MainActivity.TAG, "adapter ready");
                 return convertView;
@@ -607,7 +684,7 @@ public class ManagerFragment extends Fragment {
         } else {
             final File parent;
             if (mSelectedDir != null && (parent = mSelectedDir.getParentFile()) != null) {
-                changeDirectory(parent);
+                onFileClick(parent);
             }
         }
     }
@@ -749,41 +826,24 @@ public class ManagerFragment extends Fragment {
         return (file != null && file.canWrite());
     }
 
-    private void changeDirectory(final File dir) {
+    private void onFileClick(final File file) {
         Log.d(MainActivity.TAG, "changeDirectory");
-        if (dir == null) {
+        if (file == null) {
             debug("Could not change folder: dir was null");
-        } else if (!dir.isDirectory()) {
-            String mimeType = checkFileType(dir.getAbsolutePath());
+        } else if (!file.isDirectory()) {
+            String mimeType = checkFileType(file.getAbsolutePath());
             Log.d(MainActivity.TAG, "mimeType = " + mimeType);
-/*            if (mimeType.startsWith("image")) {
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra("uri", dir.getAbsolutePath());
-                intent.putExtra("type", "image");
-                startActivity(intent);
-            } else if (mimeType.startsWith("video")) {
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra("uri", dir.getAbsolutePath());
-                intent.putExtra("type", "video");
-                startActivity(intent);
-            } else if (mimeType.startsWith("audio")) {
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra("uri", dir.getAbsolutePath());
-                intent.putExtra("type", "audio");
-                startActivity(intent);
-            }
-            else */
-            if (mimeType.startsWith("text") && !mimeType.equals("text/html")) {
-                //Intent intent = new Intent(getActivity(), PlayerActivity.class);
+            if (mimeType.startsWith("text") && !mimeType.equals("text/html") ||
+                    file.getName().contains(".swift") || file.getName().contains(".kt")) {
                 Intent intent = new Intent(getActivity(), EditorActivity.class);
-                intent.putExtra("uri", dir.getAbsolutePath());
+                intent.putExtra("uri", file.getAbsolutePath());
                 intent.putExtra("type", "text");
                 startActivity(intent);
             } else {
                 Log.d(MainActivity.TAG, "target");
                 Intent target = new Intent(Intent.ACTION_VIEW);
                 Uri targetUri = FileProvider.getUriForFile(getActivity(), getActivity()
-                        .getApplicationContext().getPackageName() + ".fileprovider", dir);
+                        .getApplicationContext().getPackageName() + ".fileprovider", file);
                 Log.d(MainActivity.TAG, "data = " + targetUri.toString());
                 target.setDataAndType(targetUri, mimeType);
                 target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -801,17 +861,17 @@ public class ManagerFragment extends Fragment {
             }
         } else {
             sortWay = 0;
-            String path1 = dir.getAbsolutePath();
+            String path1 = file.getAbsolutePath();
             String path2 = path1.replace("/", " > ");
             directoryTextView.setText(path2);
-            refreshLists(dir);
-            mSelectedDir = dir;
+            refreshLists(file);
+            mSelectedDir = file;
         }
     }
 
-    private void refreshLists(File dir) {
+    private void refreshLists(File file) {
         searchString = "";
-        final File[] contents = dir.listFiles();
+        final File[] contents = file.listFiles();
         if (contents != null) {
             int numDirectories = 0;
             for (final File f : contents) {
@@ -837,7 +897,7 @@ public class ManagerFragment extends Fragment {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 setInitialDir();
-                changeDirectory(initialDir);
+                onFileClick(initialDir);
             }
             //TODO
         }
