@@ -35,16 +35,12 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,8 +66,8 @@ public class ManagerFragment extends Fragment {
     private File initialDir;
     private boolean longPressed;
     private boolean cutFile;
-    private String dialogItems[];
-    private String sortDialogItems[];
+    private String[] dialogItems;
+    private String[] sortDialogItems;
     private String bufferedFilePath;
     private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yyyy HH:mm");
     private int sortWay;
@@ -80,6 +76,14 @@ public class ManagerFragment extends Fragment {
 
     public void setListener(FragmentInteractionListener listener) {
         this.listener = listener;
+    }
+
+    public String getCurrentDirectory() {
+        return mSelectedDir.getAbsolutePath();
+    }
+
+    public void setCurrentDirectory(String dir) {
+        mInitialDirectory = dir;
     }
 
     @Override
@@ -104,6 +108,8 @@ public class ManagerFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.manager_layout, null);
         Log.d(MainActivity.TAG, "ExplorerFragment onCreateView");
+
+        listener.setCurrentDirectory();
 
         directoryTextView = (TextView) v.findViewById(R.id.directoryTextView);
         longPressed = false;
@@ -152,7 +158,6 @@ public class ManagerFragment extends Fragment {
         mListDirectoriesAdapter.setLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                //longPressed = true;
                 int position = recyclerView.getChildAdapterPosition(v);
                 //Log.d(MainActivity.TAG, "onLongClick position = " + position);
                 if (hasPermissions()) {
@@ -217,15 +222,6 @@ public class ManagerFragment extends Fragment {
             }
         });
 
-        final int[] icons = {
-                R.drawable.a_z,
-                R.drawable.z_a,
-                R.drawable.old_new,
-                R.drawable.new_old,
-                R.drawable.small_large,
-                R.drawable.large_small
-        };
-
         final String[] leftSymbols = {
                 "A",
                 "Z",
@@ -271,7 +267,6 @@ public class ManagerFragment extends Fragment {
                     holder.rightSymbolTextView = (TextView) convertView.findViewById(R.id.rightSymbolTextView);
                     convertView.setTag(holder);
                 } else {
-                    // view already defined, retrieve view holder
                     holder = (ViewHolder) convertView.getTag();
                 }
 
@@ -424,7 +419,7 @@ public class ManagerFragment extends Fragment {
             mFilesInDir.add(newFolder);
             displayedList.clear();
             displayedList.addAll(mFilesInDir);
-            renameFile(mFilesInDir.size() - 1);
+            renameFile(mFilesInDir.size() - 1, true);
         } else {
             Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.no_folder_created), Toast.LENGTH_SHORT).show();
         }
@@ -509,7 +504,6 @@ public class ManagerFragment extends Fragment {
                     convertView.setTag(holder);
                 } else {
                     Log.d(MainActivity.TAG, "convertView defined");
-                    // view already defined, retrieve view holder
                     holder = (ViewHolder) convertView.getTag();
                 }
 
@@ -565,7 +559,7 @@ public class ManagerFragment extends Fragment {
                         break;
                     case 4:
                         Log.d(MainActivity.TAG, "rename");
-                        renameFile(position);
+                        renameFile(position, false);
                         break;
                 }
             }
@@ -590,7 +584,7 @@ public class ManagerFragment extends Fragment {
     }
 
     @SuppressLint("RestrictedApi")
-    private void renameFile(final int position) {
+    private void renameFile(final int position, final boolean newFolder) {
         Log.d(MainActivity.TAG, "renameFile");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
 
@@ -603,7 +597,6 @@ public class ManagerFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         lp.setMargins(0, 80, 0, 80);
         inputEditText.setLayoutParams(lp);
-        //inputEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
         if (file.isDirectory()) {
             inputEditText.setSelection(initialName.length());
@@ -621,6 +614,9 @@ public class ManagerFragment extends Fragment {
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
                         inputEditText.clearFocus();
+                        if (newFolder) {
+                            deleteFile(position, false);
+                        }
                         dialog.dismiss();
                     }
                 })
@@ -642,7 +638,7 @@ public class ManagerFragment extends Fragment {
                                 } else {
                                     Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.name_exists), Toast.LENGTH_SHORT).show();
                                     dialog.dismiss();
-                                    renameFile(position);
+                                    renameFile(position, false);
                                     return;
                                 }
                             }
@@ -679,7 +675,7 @@ public class ManagerFragment extends Fragment {
     }
 
     public void onBackPressed() {
-        if (mSelectedDir.getAbsolutePath().equals(initialDir.getAbsolutePath())) {
+        if (mSelectedDir.getAbsolutePath().equals(Environment.getExternalStorageDirectory().getAbsolutePath())) {
             listener.onFinishApp();
         } else {
             final File parent;
@@ -763,8 +759,6 @@ public class ManagerFragment extends Fragment {
         Log.d(MainActivity.TAG, "deleteFile");
         File file = new File(path);
         if (file.exists()) {
-            //recursiveDelete(file);
-            //refreshLists(mSelectedDir);
             if (showDialog) {
                 confirmDialog(file);
             } else {
@@ -779,8 +773,6 @@ public class ManagerFragment extends Fragment {
 
         File file = displayedList.get(position);
         if (file.exists()) {
-            //recursiveDelete(file);
-            //refreshLists(mSelectedDir);
             if (showDialog) {
                 confirmDialog(file);
             } else {

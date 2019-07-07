@@ -4,4 +4,5 @@ public interface FragmentInteractionListener {
     void onFinishApp();
     void setPasteIconState(boolean visible);
     void onInfoClose();
+    void setCurrentDirectory();
 }

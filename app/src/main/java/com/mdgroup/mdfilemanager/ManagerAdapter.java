@@ -2,17 +2,14 @@ package com.mdgroup.mdfilemanager;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.io.File;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -23,7 +20,6 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     private View.OnLongClickListener longClickListener;
     private ArrayList<File> objects;
     private Context context;
-    private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yy HH:mm");
     private SimpleDateFormat sdf2 = new SimpleDateFormat("dd.MM.yy");
     private SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm");
     private DecimalFormat decimalFormat1 = new DecimalFormat("##.##");
@@ -120,10 +116,8 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         }
     }
 
-
-    // WAY 1
     private static long getFileSize(File file) {
-        long size = 0;
+        long size;
         if (file.isDirectory()) {
             size = -1;
         } else {
@@ -131,38 +125,6 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         }
         return size;
     }
-
-    // WAY 2
-/*    private static long getFileSize(File file) {
-        long size = 0;
-        if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                size += getFileSize(child);
-            }
-        } else {
-            size = file.length();
-        }
-        return size;
-    }*/
-
-    // WAY 3
-/*    private static long getFileSize(File file) {
-        long size = 0;
-        if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                if (child.isDirectory()) {
-                    size = -1;
-                    break;
-                } else {
-                    size += child.length();
-                }
-            }
-        } else {
-            size = file.length();
-        }
-        return size;
-    }*/
-
 
     private String checkFileType(String path) {
         String mimeType = URLConnection.guessContentTypeFromName(path);

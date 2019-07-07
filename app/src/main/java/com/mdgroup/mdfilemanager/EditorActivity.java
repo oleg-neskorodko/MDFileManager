@@ -12,17 +12,14 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +43,6 @@ public class EditorActivity extends AppCompatActivity {
     private String searchText;
     private ArrayList<Integer> indexes;
     private int arrayFocus;
-
     private TextView nameEditorTextView;
     private ImageView saveEditorImageView;
     private ImageView findEditorImageView;
@@ -60,20 +56,15 @@ public class EditorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(MainActivity.TAG, "EditorActivity onCreate");
         setContentView(R.layout.activity_editor);
 
-        Log.d(MainActivity.TAG, "EditorActivity onCreate");
-
         uriString = getIntent().getStringExtra("uri");
-        Log.d(MainActivity.TAG, "EditorActivity onCreate" + uriString);
         uri = Uri.parse(uriString);
         file = new File(uriString);
-        String type = getIntent().getStringExtra("type");
         indexes = new ArrayList<>();
-
         editorToolbar = findViewById(R.id.editorToolbar);
         editorEditText = findViewById(R.id.editorEditText);
-
 
         nameEditorTextView = editorToolbar.findViewById(R.id.nameEditorTextView);
         saveEditorImageView = editorToolbar.findViewById(R.id.saveEditorImageView);
@@ -84,7 +75,6 @@ public class EditorActivity extends AppCompatActivity {
         foundEditorTextView = editorToolbar.findViewById(R.id.foundEditorTextView);
         findEditorLayout = editorToolbar.findViewById(R.id.findEditorLayout);
 
-
         Typeface customFont = ResourcesCompat.getFont(this, R.font.symbola);
         backEditorTextView.setTypeface(customFont);
         backEditorTextView.setText("\uD83E\uDC60");
@@ -92,13 +82,8 @@ public class EditorActivity extends AppCompatActivity {
         forwardEditorTextView.setText("\uD83E\uDC62");
 
         findEditorLayout.setVisibility(View.GONE);
-/*        editorSearchView.setVisibility(View.GONE);
-        backEditorTextView.setVisibility(View.GONE);
-        forwardEditorTextView.setVisibility(View.GONE);
-        foundEditorTextView.setVisibility(View.GONE);*/
 
         nameEditorTextView.setText(file.getName());
-        //TODO max width
 
         View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
@@ -147,7 +132,6 @@ public class EditorActivity extends AppCompatActivity {
             }
         });
 
-
         setSupportActionBar(editorToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -185,15 +169,9 @@ public class EditorActivity extends AppCompatActivity {
                     }
                 }
                 editorEditText.setText(spannedText);
-                editorEditText.setSelection((indexes.get(arrayFocus)));
+                editorEditText.setSelection((indexes.get(arrayFocus - 1)));
             }
         }
-    }
-
-    private String getSelectedText() {
-        int startSelection = editorEditText.getSelectionStart();
-        int endSelection = editorEditText.getSelectionEnd();
-        return editorEditText.getText().toString().substring(startSelection, endSelection);
     }
 
     private void showSearchToolbar() {
@@ -236,6 +214,7 @@ public class EditorActivity extends AppCompatActivity {
                     }
                 }
                 editorEditText.setText(spannedText);
+                editorEditText.setSelection((indexes.get(arrayFocus - 1)));
             } else {
                 foundEditorTextView.setText("0/0");
                 editorEditText.setText(currentText);
@@ -286,7 +265,6 @@ public class EditorActivity extends AppCompatActivity {
     private void saveDocument() {
         String text = editorEditText.getText().toString();
         try {
-            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.openFileOutput(uriString, this.MODE_PRIVATE));
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file), charsetName);
             outputStreamWriter.write(text);
             outputStreamWriter.close();

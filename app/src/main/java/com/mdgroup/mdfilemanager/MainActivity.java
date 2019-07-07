@@ -1,28 +1,21 @@
 package com.mdgroup.mdfilemanager;
 
-import android.content.ClipData;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements FragmentInteractionListener {
 
@@ -31,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     private AboutFragment aboutFragment;
     private Toolbar toolbarTop;
     private SearchView mainSearchView;
-
+    private String currentDirectory;
     private ImageView pasteMainImageView;
     private ImageView sortMainImageView;
     private ImageView searchMainImageView;
@@ -54,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         super.onCreate(savedInstanceState);
         Log.d(TAG, "MainActivity onCreate");
         setContentView(R.layout.activity_main);
-        //Log.d(TAG, "MainActivity setContentView");
 
         menuNames = getResources().getStringArray(R.array.menu_items);
         menuIndexes = new int[]{0, 1, 2, 3, 4, 5};
@@ -103,8 +95,10 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                         }
                         break;
                     case R.id.infoMainImageView:
-                        Log.d(TAG, "MainActivity infoMainImageView click");
                         showHideInfoToolbar(View.GONE, View.VISIBLE, false);
+                        if (managerFragment != null) {
+                            currentDirectory = managerFragment.getCurrentDirectory();
+                        }
                         aboutFragment = new AboutFragment();
                         aboutFragment.setListener(MainActivity.this);
                         getSupportFragmentManager().beginTransaction()
@@ -117,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         for (int i = 0; i < toolbarIcon.length; i++) {
             toolbarIcon[i].setOnClickListener(menuClickListener);
         }
-
 
         mainSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -149,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
-        //RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) pasteMainImageView.getLayoutParams();
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) pasteMainImageView.getLayoutParams();
         int iconWidth = pasteMainImageView.getLayoutParams().width + lp.rightMargin + lp.leftMargin;
         Log.d(TAG, "MainActivity iconWidth = " + iconWidth + " , screen = " + screenWidth);
@@ -233,21 +225,8 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                 menuItems[i] = menu.add(Menu.NONE, overflowMenuIndex[i], i, overflowMenuNames[i]);
             }
         }
-
         return true;
-        //getMenuInflater().inflate(R.menu.menu1, menu);
-        //mainMenu = menu;
-        //createSearch(menu);
-        //return super.onCreateOptionsMenu(menu);
     }
-
-/*    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item= menu.findItem(R.id.menu_settings);
-        item.setVisible(false);
-        super.onPrepareOptionsMenu(menu);
-        return true;
-    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -279,6 +258,9 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                 break;
             case 5:
                 showHideInfoToolbar(View.GONE, View.VISIBLE, false);
+                if (managerFragment != null) {
+                    currentDirectory = managerFragment.getCurrentDirectory();
+                }
                 aboutFragment = new AboutFragment();
                 aboutFragment.setListener(MainActivity.this);
                 getSupportFragmentManager().beginTransaction()
@@ -305,6 +287,11 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     }
 
     @Override
+    public void setCurrentDirectory() {
+        managerFragment.setCurrentDirectory(currentDirectory);
+    }
+
+    @Override
     public void onBackPressed() {
         Log.d(TAG, "MainActivity onBackPressed");
         FragmentManager fm = getSupportFragmentManager();
@@ -320,7 +307,5 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         Log.d(TAG, "MainActivity onFinishApp");
         finish();
     }
-
-
 }
 
