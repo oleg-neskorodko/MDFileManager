@@ -65,6 +65,11 @@
         android:id="@+id/rateAboutButton"
         android:typeface="monospace"
         android:textStyle="bold"
+        android:textColor="@color/colorIcon2"
+        android:background="@drawable/my_button"
+
+        android:paddingVertical="5dp"
+        android:paddingHorizontal="10dp"
         android:text="@string/info_rate_button"
         android:layout_marginBottom="5dp"
         android:layout_gravity="center_horizontal"

@@ -12,7 +12,10 @@
         android:roundIcon="@mipmap/logo_v11_black_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Transparent">
-        <activity android:name=".EditorActivity"></activity>
+        <activity
+            android:name=".EditorActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden">
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

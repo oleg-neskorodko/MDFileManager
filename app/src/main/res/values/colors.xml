@@ -14,6 +14,9 @@
     <color name="colorToolbar">#746256</color>
     <color name="colorIcon">#C2A697</color>
     <color name="opaque00">#00000000</color>
+    <color name="opaque10">#1A000000</color>
+    <color name="opaque20">#33000000</color>
+    <color name="opaque50">#80000000</color>
     <color name="opaque70">#B2000000</color>
     <color name="opaque60">#99000000</color>
     <color name="opaque80">#CC000000</color>

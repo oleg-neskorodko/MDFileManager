@@ -100,9 +100,8 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                             currentDirectory = managerFragment.getCurrentDirectory();
                         }
                         aboutFragment = new AboutFragment();
-                        aboutFragment.setListener(MainActivity.this);
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("main_stack").commit();
+                                .replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("about_fragment").commit();
                         break;
                 }
             }
@@ -143,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) pasteMainImageView.getLayoutParams();
-        int iconWidth = pasteMainImageView.getLayoutParams().width + lp.rightMargin + lp.leftMargin;
+        int iconWidth = pasteMainImageView.getLayoutParams().width + 2 * lp.rightMargin;
         Log.d(TAG, "MainActivity iconWidth = " + iconWidth + " , screen = " + screenWidth);
 
         int iconNumber = (screenWidth - screenWidth % iconWidth) / iconWidth;
@@ -159,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
 
         Drawable source = getResources().getDrawable(R.drawable.overflow_menu);
         Bitmap bitmap = ((BitmapDrawable) source).getBitmap();
-        Drawable drawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 40, 40, true));
+        Drawable drawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 50, 50, true));
         drawable.setTint(getResources().getColor(R.color.colorWhite));
         toolbarTop.setOverflowIcon(drawable);
         pasteMainImageView.setVisibility(View.INVISIBLE);
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         managerFragment = new ManagerFragment();
         managerFragment.setListener(this);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, managerFragment, "manager_fragment").addToBackStack("main_stack").commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, managerFragment, "manager_fragment").addToBackStack("manager_fragment").commit();
         } else {
             ManagerFragment fragment = (ManagerFragment) getSupportFragmentManager().findFragmentByTag("manager_fragment");
             if (fragment != null) {
@@ -262,9 +261,8 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                     currentDirectory = managerFragment.getCurrentDirectory();
                 }
                 aboutFragment = new AboutFragment();
-                aboutFragment.setListener(MainActivity.this);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("main_stack").commit();
+                        .replace(R.id.content_frame, aboutFragment, "about_fragment").addToBackStack("about_fragment").commit();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -280,7 +278,6 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         }
     }
 
-    @Override
     public void onInfoClose() {
         Log.d(TAG, "MainActivity onInfoClose");
         showHideInfoToolbar(View.VISIBLE, View.GONE, true);
@@ -295,6 +292,11 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     public void onBackPressed() {
         Log.d(TAG, "MainActivity onBackPressed");
         FragmentManager fm = getSupportFragmentManager();
+        String entryName = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
+        Log.d(TAG, "MainActivity backstack fragment = " + entryName);
+        if (entryName.equals("about_fragment")) {
+            onInfoClose();
+        }
         if (fm.getBackStackEntryCount() == 1) {
             if (managerFragment != null) {
                 managerFragment.onBackPressed();

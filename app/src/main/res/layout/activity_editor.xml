@@ -13,8 +13,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+
+        <EditText
+            android:id="@+id/editorEditText"
+            style="@style/MainText"
+            android:layout_weight="3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:gravity="top"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+
         <android.support.v7.widget.Toolbar
             android:id="@+id/editorToolbar"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorBlack"
@@ -37,13 +55,13 @@
 
                 <ImageView
                     android:id="@+id/saveEditorImageView"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@+id/findEditorImageView"
                     android:tint="@color/colorWhite"
-                    android:src="@drawable/save" />
+                    android:src="@drawable/save5" />
 
                 <ImageView
                     android:id="@+id/findEditorImageView"
@@ -51,9 +69,8 @@
                     android:layout_height="30dp"
                     android:layout_alignParentRight="true"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:tint="@color/colorWhite"
-                    android:src="@drawable/search" />
+                    android:src="@drawable/search5" />
 
                 <LinearLayout
                     android:id="@+id/findEditorLayout"
@@ -96,17 +113,6 @@
                 </LinearLayout>
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
-
-        <EditText
-            android:id="@+id/editorEditText"
-            style="@style/MainText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:gravity="top"
-            android:inputType="textMultiLine|textNoSuggestions"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp" />
 
     </LinearLayout>
 

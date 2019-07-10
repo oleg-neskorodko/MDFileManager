@@ -10,7 +10,8 @@
 
     <TextView
         android:id="@+id/directoryTextView"
-        android:text=""
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         style="@style/SupportingText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

@@ -16,22 +16,23 @@ import android.widget.Button;
 
 public class AboutFragment extends Fragment {
 
+    private String marketLink;
+    private String webLink;
     private Button rateAboutButton;
-    private FragmentInteractionListener listener;
-    public void setListener(FragmentInteractionListener listener) {
-        this.listener = listener;
-    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.about_layout, null);
 
+        marketLink = getActivity().getResources().getString(R.string.market_link);
+        webLink = getActivity().getResources().getString(R.string.web_link);
+
         rateAboutButton = v.findViewById(R.id.rateAboutButton);
         rateAboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.parse("market://details?id=" + getActivity().getPackageName());
+                Uri uri = Uri.parse(marketLink + getActivity().getPackageName());
                 Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
                 goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
                         Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
@@ -40,16 +41,10 @@ public class AboutFragment extends Fragment {
                     startActivity(goToMarket);
                 } catch (ActivityNotFoundException e) {
                     startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://play.google.com/store/apps/details?id=" + getActivity().getPackageName())));
+                            Uri.parse(webLink + getActivity().getPackageName())));
                 }
             }
         });
         return v;
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        listener.onInfoClose();
     }
 }

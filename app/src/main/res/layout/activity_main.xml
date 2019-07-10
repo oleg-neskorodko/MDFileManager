@@ -15,8 +15,23 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+
+
+        <FrameLayout
+            android:id="@+id/content_frame"
+            android:layout_weight="3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </FrameLayout>
+
         <android.support.v7.widget.Toolbar
             android:id="@+id/mainToolbar"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorBlack"
@@ -50,9 +65,8 @@
                     android:tint="@color/colorWhite"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/paste3" />
+                    android:src="@drawable/paste6" />
 
                 <Space
                     android:layout_weight="1"
@@ -66,7 +80,7 @@
                     android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/sort" />
+                    android:src="@drawable/sort5" />
 
                 <Space
                     android:layout_weight="1"
@@ -80,7 +94,7 @@
                     android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/search" />
+                    android:src="@drawable/search5" />
 
                 <Space
                     android:layout_weight="1"
@@ -94,7 +108,7 @@
                     android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/new_folder3" />
+                    android:src="@drawable/new_folder5" />
 
                 <Space
                     android:layout_weight="1"
@@ -108,7 +122,7 @@
                     android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/new_file3" />
+                    android:src="@drawable/new_file5" />
 
                 <Space
                     android:layout_weight="1"
@@ -121,8 +135,7 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:src="@drawable/info4" />
+                    android:src="@drawable/info5" />
 
                 <SearchView
                     android:id="@+id/mainSearchView"
@@ -132,13 +145,6 @@
 
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
-
-        <FrameLayout
-            android:id="@+id/content_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </FrameLayout>
 
     </LinearLayout>
 </LinearLayout>

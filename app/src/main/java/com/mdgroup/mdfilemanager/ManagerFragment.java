@@ -261,10 +261,10 @@ public class ManagerFragment extends Fragment {
                     convertView = inflater.inflate(R.layout.list_item, null);
 
                     holder = new ViewHolder();
-                    holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
-                    holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
-                    holder.leftSymbolTextView = (TextView) convertView.findViewById(R.id.leftSymbolTextView);
-                    holder.rightSymbolTextView = (TextView) convertView.findViewById(R.id.rightSymbolTextView);
+                    holder.iconImageView = convertView.findViewById(R.id.iconImageView);
+                    holder.titleTextView = convertView.findViewById(R.id.titleTextView);
+                    holder.leftSymbolTextView = convertView.findViewById(R.id.leftSymbolTextView);
+                    holder.rightSymbolTextView = convertView.findViewById(R.id.rightSymbolTextView);
                     convertView.setTag(holder);
                 } else {
                     holder = (ViewHolder) convertView.getTag();
@@ -497,10 +497,10 @@ public class ManagerFragment extends Fragment {
                     Log.d(MainActivity.TAG, "convertView null");
 
                     holder = new ViewHolder();
-                    holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
-                    holder.titleTextView = (TextView) convertView.findViewById(R.id.titleTextView);
-                    holder.leftSymbolTextView = (TextView) convertView.findViewById(R.id.leftSymbolTextView);
-                    holder.rightSymbolTextView = (TextView) convertView.findViewById(R.id.rightSymbolTextView);
+                    holder.iconImageView = convertView.findViewById(R.id.iconImageView);
+                    holder.titleTextView = convertView.findViewById(R.id.titleTextView);
+                    holder.leftSymbolTextView = convertView.findViewById(R.id.leftSymbolTextView);
+                    holder.rightSymbolTextView = convertView.findViewById(R.id.rightSymbolTextView);
                     convertView.setTag(holder);
                 } else {
                     Log.d(MainActivity.TAG, "convertView defined");
