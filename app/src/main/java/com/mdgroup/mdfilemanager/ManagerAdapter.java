@@ -1,10 +1,15 @@
 package com.mdgroup.mdfilemanager;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.io.File;
@@ -19,6 +24,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     private View.OnClickListener clickListener;
     private View.OnLongClickListener longClickListener;
     private ArrayList<File> objects;
+    private ArrayList<Boolean> checkBoxState;
     private Context context;
     private SimpleDateFormat sdf2 = new SimpleDateFormat("dd.MM.yy");
     private SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm");
@@ -28,7 +34,10 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     public ManagerAdapter(Context context, ArrayList<File> objects) {
         this.context = context;
         this.objects = objects;
+        checkBoxState = new ArrayList<>();
     }
+
+
 
     public void setClickListener(View.OnClickListener callback) {
         clickListener = callback;
@@ -40,7 +49,13 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
 
     @Override
     public ManagerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //Log.d(MainActivity.TAG, "onCreateViewHolder post size = " + getItemCount());
+        Log.d(MainActivity.TAG, "onCreateViewHolder post size = " + getItemCount());
+
+        checkBoxState.clear();
+        for (int i = 0; i < objects.size(); i++) {
+            Log.d(MainActivity.TAG, "work");
+            checkBoxState.add(false);
+        }
 
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.manager_item,
                 parent, false);
@@ -65,8 +80,34 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(ManagerAdapter.ViewHolder holder, int position) {
-        //Log.d(MainActivity.TAG, "onBindViewHolder post size = " + getItemCount());
+    public void onBindViewHolder(final ManagerAdapter.ViewHolder holder, final int position) {
+        //Log.d(MainActivity.TAG, "onBindViewHolder post size = " + checkBoxState.get(position));
+
+        //in some cases, it will prevent unwanted situations
+        holder.itemCheckBox.setOnCheckedChangeListener(null);
+        holder.itemCheckBox.setChecked(checkBoxState.get(position));
+        if (checkBoxState.get(position)) {
+            holder.itemCheckBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorGray1)));
+        } else {
+            holder.itemCheckBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorGray3)));
+        }
+/*        String str = new String("");
+        for (int i = 0; i < checkBoxState.size(); i++) {
+            str += checkBoxState.get(i).toString();
+        }
+        Log.d(MainActivity.TAG, "checkBoxState  = " + str);*/
+        holder.itemCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    holder.itemCheckBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorGray1)));
+                    checkBoxState.set(position, true);
+                } else {
+                    holder.itemCheckBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorGray3)));
+                    checkBoxState.set(position, false);
+                }
+            }
+        });
 
         holder.nameTextView.setText(objects.get(position).getName());
         long date = objects.get(position).lastModified();
@@ -148,6 +189,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         TextView timeTextView;
         TextView discSpaceTextView;
         ImageView pictureImageView;
+        CheckBox itemCheckBox;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -156,6 +198,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
             timeTextView = itemView.findViewById(R.id.timeTextView);
             discSpaceTextView = itemView.findViewById(R.id.discSpaceTextView);
             pictureImageView = itemView.findViewById(R.id.pictureImageView);
+            itemCheckBox = itemView.findViewById(R.id.itemCheckBox);
         }
     }
 }

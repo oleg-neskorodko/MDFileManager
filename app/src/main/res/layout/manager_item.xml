@@ -6,70 +6,79 @@
     android:background="@color/opaque00"
     android:orientation="horizontal">
 
+    <ImageView
+        android:id="@+id/pictureImageView"
+        android:layout_alignParentLeft="true"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:tint="@color/colorIcon2" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingLeft="10dp">
-
-        <ImageView
-            android:id="@+id/pictureImageView"
-            android:layout_alignParentLeft="true"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:tint="@color/colorIcon2" />
+        android:paddingRight="10dp"
+        android:paddingLeft="5dp">
 
         <TextView
             android:id="@+id/nameTextView"
             style="@style/MainText"
+            android:paddingTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/pictureImageView"
-            android:layout_toLeftOf="@+id/dateTimeLayout"
-            android:paddingLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/itemCheckBox"
             android:text="text" />
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/dateTimeLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="10dp"
-            android:orientation="vertical">
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/nameTextView"
+            android:layout_toLeftOf="@+id/itemCheckBox">
+
+            <TextView
+                android:id="@+id/discSpaceTextView"
+                style="@style/SupportingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="space" />
 
             <TextView
                 android:id="@+id/dateTextView"
                 style="@style/SupportingText"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="right"
+                android:layout_toLeftOf="@+id/timeTextView"
                 android:paddingLeft="10dp"
                 android:text="date" />
 
             <TextView
                 android:id="@+id/timeTextView"
                 style="@style/SupportingText"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="right"
+                android:layout_alignParentRight="true"
                 android:paddingLeft="10dp"
                 android:text="time" />
 
-            <TextView
-                android:id="@+id/discSpaceTextView"
-                style="@style/SupportingText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="right"
-                android:paddingLeft="10dp"
-                android:text="space" />
+        </RelativeLayout>
 
-        </LinearLayout>
+        <CheckBox
+            android:id="@+id/itemCheckBox"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:buttonTint="@color/colorGray3"
+            android:text="" />
 
     </RelativeLayout>
 

@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -450,7 +451,7 @@ public class ManagerFragment extends Fragment {
                 mFilesInDir.add(newFile);
                 displayedList.clear();
                 displayedList.addAll(mFilesInDir);
-                recyclerView.getAdapter().notifyDataSetChanged();
+                renameFile(mFilesInDir.size() - 1, true);
             } else {
                 Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.no_file_created), Toast.LENGTH_SHORT).show();
             }
@@ -584,19 +585,25 @@ public class ManagerFragment extends Fragment {
     }
 
     @SuppressLint("RestrictedApi")
-    private void renameFile(final int position, final boolean newFolder) {
+    private void renameFile(final int position, final boolean newFile) {
         Log.d(MainActivity.TAG, "renameFile");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
 
         final EditText inputEditText = new EditText(getActivity());
+        inputEditText.setSingleLine();
+        inputEditText.setTypeface(Typeface.MONOSPACE);
         File file = displayedList.get(position);
         final String initialName = file.getName();
         inputEditText.setText(initialName);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.setMargins(0, 80, 0, 80);
-        inputEditText.setLayoutParams(lp);
+        FrameLayout container = new FrameLayout(getActivity());
+        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin = 40;
+        params.bottomMargin = 40;
+        params.leftMargin = 20;
+        params.rightMargin = 20;
+        inputEditText.setLayoutParams(params);
+        container.addView(inputEditText);
+        builder.setView(container);
 
         if (file.isDirectory()) {
             inputEditText.setSelection(initialName.length());
@@ -614,7 +621,7 @@ public class ManagerFragment extends Fragment {
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
                         inputEditText.clearFocus();
-                        if (newFolder) {
+                        if (newFile) {
                             deleteFile(position, false);
                         }
                         dialog.dismiss();
@@ -651,7 +658,7 @@ public class ManagerFragment extends Fragment {
                         }
                     }
                 });
-        builder.setView(inputEditText, 0 ,20, 0 , 20);
+
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
