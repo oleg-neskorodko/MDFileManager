@@ -23,6 +23,8 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
 
     private View.OnClickListener clickListener;
     private View.OnLongClickListener longClickListener;
+    //private CompoundButton.OnCheckedChangeListener checkBoxListener;
+    private CheckBoxListener checkBoxListener;
     private ArrayList<File> objects;
     private ArrayList<Boolean> checkBoxState;
     private Context context;
@@ -31,10 +33,10 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     private DecimalFormat decimalFormat1 = new DecimalFormat("##.##");
     private DecimalFormat decimalFormat2 = new DecimalFormat("##");
 
-    public ManagerAdapter(Context context, ArrayList<File> objects) {
+    public ManagerAdapter(Context context, ArrayList<File> objects, ArrayList<Boolean> checkBoxState) {
         this.context = context;
         this.objects = objects;
-        checkBoxState = new ArrayList<>();
+        this.checkBoxState = checkBoxState;
     }
 
 
@@ -47,15 +49,24 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         longClickListener = callback;
     }
 
+    public void setCheckBoxListener(CheckBoxListener listener) {
+        checkBoxListener = listener;
+    }
+
+/*    public void setCheckBoxListener(CompoundButton.OnCheckedChangeListener callback) {
+        checkBoxListener = callback;
+    }*/
+
     @Override
     public ManagerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d(MainActivity.TAG, "onCreateViewHolder post size = " + getItemCount());
+        //Log.d(MainActivity.TAG, "onCreateViewHolder post size = " + getItemCount());
 
+/*
         checkBoxState.clear();
         for (int i = 0; i < objects.size(); i++) {
-            Log.d(MainActivity.TAG, "work");
             checkBoxState.add(false);
         }
+*/
 
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.manager_item,
                 parent, false);
@@ -83,6 +94,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     public void onBindViewHolder(final ManagerAdapter.ViewHolder holder, final int position) {
         //Log.d(MainActivity.TAG, "onBindViewHolder post size = " + checkBoxState.get(position));
 
+        //TODO fix bugs !!!
         //in some cases, it will prevent unwanted situations
         holder.itemCheckBox.setOnCheckedChangeListener(null);
         holder.itemCheckBox.setChecked(checkBoxState.get(position));
@@ -99,6 +111,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         holder.itemCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                checkBoxListener.onCheckedChanged(position, isChecked);
                 if (isChecked) {
                     holder.itemCheckBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorGray1)));
                     checkBoxState.set(position, true);

@@ -36,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -63,6 +64,10 @@ public class ManagerFragment extends Fragment {
     private ArrayList<File> mFilesInDir;
     private ArrayList<File> filteredList;
     private ArrayList<File> displayedList;
+    private ArrayList<Integer> checkedItems;
+    private ArrayList<Integer> bufferedFilesIndexList;
+    private ArrayList<String> bufferedFilesList;
+    private ArrayList<Boolean> checkBoxState;
     private final int MY_PERMISSIONS_REQUEST = 1;
     private File initialDir;
     private boolean longPressed;
@@ -135,7 +140,11 @@ public class ManagerFragment extends Fragment {
         mFilesInDir = new ArrayList<>();
         filteredList = new ArrayList<>();
         displayedList = new ArrayList<>();
-        mListDirectoriesAdapter = new ManagerAdapter(getActivity(), displayedList);
+        checkedItems = new ArrayList<>();
+        bufferedFilesIndexList = new ArrayList<>();
+        bufferedFilesList = new ArrayList<>();
+        checkBoxState = new ArrayList<>();
+        mListDirectoriesAdapter = new ManagerAdapter(getActivity(), displayedList, checkBoxState);
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(layoutManager);
@@ -168,6 +177,23 @@ public class ManagerFragment extends Fragment {
             }
         });
 
+        mListDirectoriesAdapter.setCheckBoxListener(new CheckBoxListener() {
+            @Override
+            public void onCheckedChanged(int position, boolean isChecked) {
+                //Log.d(MainActivity.TAG, "checkedChanged = " + position + isChecked + checkedItems.size());
+                if (isChecked) {
+                    checkedItems.add(position);
+                } else {
+                    for (int i = 0; i < checkedItems.size(); i++) {
+                        if (checkedItems.get(i) == position) {
+                            checkedItems.remove(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
         //requestPermissionWithRationale(v);
 
         if (!hasPermissions()) {
@@ -180,7 +206,7 @@ public class ManagerFragment extends Fragment {
     }
 
     public void filterList(String string) {
-        Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
+        //Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
         filteredList.clear();
         searchString = string;
         if (string.equals("")) {
@@ -191,7 +217,6 @@ public class ManagerFragment extends Fragment {
             for (int i = 0; i < mFilesInDir.size(); i++) {
 
                 if (mFilesInDir.get(i).getName().toLowerCase().contains(string.toLowerCase())) {
-                    Log.d(MainActivity.TAG, "work");
                     filteredList.add(mFilesInDir.get(i));
                 }
             }
@@ -241,12 +266,13 @@ public class ManagerFragment extends Fragment {
                 "\uD83D\uDDCB"
         };
 
-        final int[] leftSymbolSizes = { 24, 24, 32, 32, 20, 28 };
-        final int[] rightSymbolSizes = { 24, 24, 8, 8, 28, 20 };
+        final int[] leftSymbolSizes = {24, 24, 32, 32, 20, 28};
+        final int[] rightSymbolSizes = {24, 24, 8, 8, 28, 20};
 
         ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, sortDialogItems) {
 
             ViewHolder holder;
+
             class ViewHolder {
                 ImageView iconImageView;
                 TextView titleTextView;
@@ -295,27 +321,21 @@ public class ManagerFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
-                        Log.d(MainActivity.TAG, "a_z");
                         sortFiles(0);
                         break;
                     case 1:
-                        Log.d(MainActivity.TAG, "z_a");
                         sortFiles(1);
                         break;
                     case 2:
-                        Log.d(MainActivity.TAG, "old_new");
                         sortFiles(2);
                         break;
                     case 3:
-                        Log.d(MainActivity.TAG, "new_old");
                         sortFiles(3);
                         break;
                     case 4:
-                        Log.d(MainActivity.TAG, "small_large");
                         sortFiles(4);
                         break;
                     case 5:
-                        Log.d(MainActivity.TAG, "large_small");
                         sortFiles(5);
                         break;
                 }
@@ -381,9 +401,12 @@ public class ManagerFragment extends Fragment {
             Collections.reverse(fileList);
         }
 
+//TODO is it necessary to sort mFilesInDir ?
         mFilesInDir.clear();
         mFilesInDir.addAll(dirList);
         mFilesInDir.addAll(fileList);
+        checkedItems.clear();
+        refreshCheckBoxState(mFilesInDir.size());
         displayedList.clear();
         displayedList.addAll(mFilesInDir);
         recyclerView.getAdapter().notifyDataSetChanged();
@@ -402,7 +425,7 @@ public class ManagerFragment extends Fragment {
         String initialName = getActivity().getResources().getString(R.string.new_folder_name);
         String suggestedName = initialName;
         int number = 1;
-        for (int j = 0; j < 1000; j++) {
+        for (int j = 0; j < 10000; j++) {
             String startLoopName = suggestedName;
             for (int i = 0; i < mFilesInDir.size(); i++) {
                 if (suggestedName.equals(mFilesInDir.get(i).getName())) {
@@ -420,7 +443,8 @@ public class ManagerFragment extends Fragment {
             mFilesInDir.add(newFolder);
             displayedList.clear();
             displayedList.addAll(mFilesInDir);
-            renameFile(mFilesInDir.size() - 1, true);
+            checkBoxState.add(false);
+            renameFile(mFilesInDir.size() - 1, true, null);
         } else {
             Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.no_folder_created), Toast.LENGTH_SHORT).show();
         }
@@ -432,7 +456,7 @@ public class ManagerFragment extends Fragment {
         String initialName = getActivity().getResources().getString(R.string.new_file_name);
         String suggestedName = initialName;
         int number = 1;
-        for (int j = 0; j < 1000; j++) {
+        for (int j = 0; j < 10000; j++) {
             String startLoopName = suggestedName;
             for (int i = 0; i < mFilesInDir.size(); i++) {
                 if ((suggestedName + fileExtension).equals(mFilesInDir.get(i).getName())) {
@@ -451,7 +475,8 @@ public class ManagerFragment extends Fragment {
                 mFilesInDir.add(newFile);
                 displayedList.clear();
                 displayedList.addAll(mFilesInDir);
-                renameFile(mFilesInDir.size() - 1, true);
+                checkBoxState.add(false);
+                renameFile(mFilesInDir.size() - 1, true, null);
             } else {
                 Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.no_file_created), Toast.LENGTH_SHORT).show();
             }
@@ -482,6 +507,7 @@ public class ManagerFragment extends Fragment {
         ListAdapter adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, dialogItems) {
 
             ViewHolder holder;
+
             class ViewHolder {
                 ImageView iconImageView;
                 TextView titleTextView;
@@ -520,47 +546,86 @@ public class ManagerFragment extends Fragment {
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                boolean applyToGroup = false;
+                if (checkedItems.size() > 0) {
+                    for (int i = 0; i < checkedItems.size(); i++) {
+                        if (checkedItems.get(i) == position) {
+                            applyToGroup = true;
+                            break;
+                        }
+                    }
+                }
                 switch (which) {
                     case 0:
                         Log.d(MainActivity.TAG, "copy");
-                        getPath(position);
+                        bufferedFilePath = "";
+                        bufferedFilesList.clear();
+                        if (applyToGroup) {
+                            getPaths(checkedItems);
+                        } else {
+                            getPath(position);
+                        }
                         listener.setPasteIconState(true);
                         cutFile = false;
                         break;
                     case 1:
                         Log.d(MainActivity.TAG, "paste, cutFile = " + cutFile);
-                        if (bufferedFilePath.equals("")) {
-                            Toast.makeText(getActivity(), "no file to paste", Toast.LENGTH_SHORT).show();
+                        if (bufferedFilePath.equals("") && bufferedFilesList.size() == 0) {
+                            Toast.makeText(getActivity(), getString(R.string.no_file_to_paste), Toast.LENGTH_SHORT).show();
                             break;
                         }
                         if (!displayedList.get(position).isDirectory()) {
-                            Toast.makeText(getActivity(), "please select destination folder", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), getString(R.string.select_dst_folder), Toast.LENGTH_SHORT).show();
                             break;
                         }
                         Log.d(MainActivity.TAG, "paste");
                         listener.setPasteIconState(false);
-                        if (cutFile && copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath())) {
-                            Log.d(MainActivity.TAG, "cutFile true");
-                            deleteFile(bufferedFilePath, false);
-                            bufferedFilePath = "";
-                        } else {
-                            copyFileOrDirectory(bufferedFilePath, displayedList.get(position).getAbsolutePath());
-                            bufferedFilePath = "";
+                        if (!bufferedFilePath.equals("")) {
+                            if (cutFile && pasteFile(bufferedFilePath, displayedList.get(position).getAbsolutePath())) {
+                                deleteFile(bufferedFilePath, false);
+                                bufferedFilePath = "";
+                            }
+                        } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+                            ArrayList<Integer> pastedFiles = new ArrayList<>();
+                            pastedFiles = pasteFiles(bufferedFilesList, displayedList.get(position).getAbsolutePath());
+                            if (cutFile) {
+                                ArrayList<String> filesToDelete = new ArrayList<>();
+                                for (int i : pastedFiles) {
+                                    filesToDelete.add(bufferedFilesList.get(i));
+                                }
+                                deleteFiles(filesToDelete);
+                                bufferedFilesList.clear();
+                            }
                         }
                         break;
                     case 2:
                         Log.d(MainActivity.TAG, "cut");
-                        getPath(position);
+                        bufferedFilePath = "";
+                        bufferedFilesList.clear();
+                        if (applyToGroup) {
+                            getPaths(checkedItems);
+                        } else {
+                            getPath(position);
+                        }
                         listener.setPasteIconState(true);
                         cutFile = true;
                         break;
                     case 3:
                         Log.d(MainActivity.TAG, "delete");
-                        deleteFile(position, true);
+                        if (applyToGroup) {
+                            Log.d(MainActivity.TAG, "applyToGroup");
+                            deleteFiles(checkedItems, true);
+                        } else {
+                            deleteFile(position, true);
+                        }
                         break;
                     case 4:
                         Log.d(MainActivity.TAG, "rename");
-                        renameFile(position, false);
+                        if (applyToGroup) {
+                            renameFile(position, false, checkedItems);
+                        } else {
+                            renameFile(position, false, null);
+                        }
                         break;
                 }
             }
@@ -577,26 +642,113 @@ public class ManagerFragment extends Fragment {
     }
 
     public void pasteFileIntoCurrentDirectory() {
-        if (cutFile & copyFileOrDirectory(bufferedFilePath, mSelectedDir.getAbsolutePath())) {
-            deleteFile(bufferedFilePath, false);
+        if (!bufferedFilePath.equals("")) {
+            if (cutFile & pasteFile(bufferedFilePath, mSelectedDir.getAbsolutePath())) {
+                deleteFile(bufferedFilePath, false);
+                bufferedFilePath = "";
+            }
+        } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+            ArrayList<Integer> pastedFiles = new ArrayList<>();
+            pastedFiles = pasteFiles(bufferedFilesList, mSelectedDir.getAbsolutePath());
+            if (cutFile) {
+                ArrayList<String> filesToDelete = new ArrayList<>();
+                for (int i : pastedFiles) {
+                    filesToDelete.add(bufferedFilesList.get(i));
+                }
+                deleteFiles(filesToDelete);
+                bufferedFilesList.clear();
+            }
         }
-        bufferedFilePath = "";
         refreshLists(mSelectedDir);
     }
 
-    @SuppressLint("RestrictedApi")
-    private void renameFile(final int position, final boolean newFile) {
+    private String silentRename(String dstDir, String inputName, boolean isDirectory) {
+        Log.d(MainActivity.TAG, "silentRename");
+        File dstDirectory = new File(dstDir);
+        File[] dstDirContents = dstDirectory.listFiles();
+
+        String outputName = inputName;
+        int number = 1;
+        if (isDirectory) {
+            Log.d(MainActivity.TAG, "silentRename, isDirectory");
+            for (int j = 0; j < 10000; j++) {
+                String startLoopName = outputName;
+                for (int i = 0; i < dstDirContents.length; i++) {
+                    if (outputName.equals(dstDirContents[i].getName())) {
+                        number++;
+                        outputName = inputName.concat("(" + number + ")");
+                        break;
+                    }
+                }
+                if (outputName.equals(startLoopName)) {
+                    break;
+                }
+            }
+        } else {
+            int lastDotIndex = inputName.lastIndexOf('.');
+            String name = "";
+            String extension = "";
+            name = inputName.substring(0, lastDotIndex);
+            extension = inputName.substring(lastDotIndex);
+
+            if (lastDotIndex > 0) {
+                Log.d(MainActivity.TAG, "silentRename, lastDotIndex > 0");
+
+                for (int j = 0; j < 10000; j++) {
+                    String startLoopName = outputName;
+                    for (int i = 0; i < dstDirContents.length; i++) {
+                        if (outputName.equals(dstDirContents[i].getName())) {
+                            number++;
+                            outputName = name.concat("(" + number + ")" + extension);
+                            break;
+                        }
+                    }
+                    if (outputName.equals(startLoopName)) {
+                        break;
+                    }
+                }
+
+            } else {
+                Log.d(MainActivity.TAG, "silentRename, lastDotIndex <= 0");
+                for (int j = 0; j < 10000; j++) {
+                    String startLoopName = outputName;
+                    for (int i = 0; i < dstDirContents.length; i++) {
+                        if (outputName.equals(dstDirContents[i].getName())) {
+                            number++;
+                            outputName = inputName.concat("(" + number + ")");
+                            break;
+                        }
+                    }
+                    if (outputName.equals(startLoopName)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return outputName;
+    }
+
+    private void renameFile(final int position, final boolean isNewFile, final ArrayList<Integer> inputList) {
         Log.d(MainActivity.TAG, "renameFile");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
+        //TODO check many, delete one, then rename
+        final ArrayList<Integer> renameList = new ArrayList<>();
+
+        if (inputList != null && inputList.size() > 0) {
+            renameList.addAll(bubbleSort(inputList));
+        } else {
+            renameList.add(position);
+        }
 
         final EditText inputEditText = new EditText(getActivity());
         inputEditText.setSingleLine();
         inputEditText.setTypeface(Typeface.MONOSPACE);
         File file = displayedList.get(position);
+        final String initialPath = file.getAbsolutePath();
         final String initialName = file.getName();
         inputEditText.setText(initialName);
         FrameLayout container = new FrameLayout(getActivity());
-        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.topMargin = 40;
         params.bottomMargin = 40;
         params.leftMargin = 20;
@@ -605,6 +757,8 @@ public class ManagerFragment extends Fragment {
         container.addView(inputEditText);
         builder.setView(container);
 
+        Log.d(MainActivity.TAG, "renameFile view added");
+
         if (file.isDirectory()) {
             inputEditText.setSelection(initialName.length());
         } else if (initialName.contains(".")) {
@@ -612,6 +766,7 @@ public class ManagerFragment extends Fragment {
         } else {
             inputEditText.setSelection(initialName.length());
         }
+        Log.d(MainActivity.TAG, "renameFile selection set");
 
         builder.setTitle(getActivity().getResources().getString(R.string.insert_new_name))
                 .setCancelable(false)
@@ -621,7 +776,7 @@ public class ManagerFragment extends Fragment {
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
                         inputEditText.clearFocus();
-                        if (newFile) {
+                        if (isNewFile) {
                             deleteFile(position, false);
                         }
                         dialog.dismiss();
@@ -635,42 +790,127 @@ public class ManagerFragment extends Fragment {
                         imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
                         inputEditText.clearFocus();
 
-                        String newName = inputEditText.getText().toString();
-                        for (int i = 0; i < mFilesInDir.size(); i++) {
-                            if (mFilesInDir.get(i).getName().equals(newName)) {
-                                if (newName.equals(initialName)) {
-                                    dialog.dismiss();
-                                    refreshLists(mSelectedDir);
-                                    return;
+                        int successfulRenames = 0;
+                        String inputName = inputEditText.getText().toString();
+
+                        for (int index : renameList) {
+
+                            if (index != position || !mFilesInDir.get(position).getName().equals(inputName)) {
+
+                                String suggestedName = inputName;
+                                int number = 1;
+
+                                if (mFilesInDir.get(index).isDirectory()) {
+                                    for (int j = 0; j < 10000; j++) {
+                                        String startLoopName = suggestedName;
+                                        for (int i = 0; i < mFilesInDir.size(); i++) {
+                                            if (suggestedName.equals(mFilesInDir.get(i).getName())) {
+                                                number++;
+                                                suggestedName = inputName.concat("(" + String.valueOf(number) + ")");
+                                                break;
+                                            }
+                                        }
+                                        if (suggestedName.equals(startLoopName)) {
+                                            break;
+                                        }
+                                    }
                                 } else {
-                                    Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.name_exists), Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                    renameFile(position, false);
-                                    return;
+                                    int lastDotIndex = inputName.lastIndexOf('.');
+                                    String name = "";
+                                    String extension = "";
+                                    name = inputName.substring(0, lastDotIndex);
+                                    extension = inputName.substring(lastDotIndex);
+
+                                    if (lastDotIndex > 0) {
+
+                                        for (int j = 0; j < 10000; j++) {
+                                            String startLoopName = suggestedName;
+                                            for (int i = 0; i < mFilesInDir.size(); i++) {
+                                                if (suggestedName.equals(mFilesInDir.get(i).getName())) {
+                                                    number++;
+                                                    suggestedName = name.concat("(" + number + ")" + extension);
+                                                    break;
+                                                }
+                                            }
+                                            if (suggestedName.equals(startLoopName)) {
+                                                break;
+                                            }
+                                        }
+
+                                    } else {
+                                        name = inputName;
+                                        for (int j = 0; j < 10000; j++) {
+                                            String startLoopName = suggestedName;
+                                            for (int i = 0; i < mFilesInDir.size(); i++) {
+                                                if (suggestedName.equals(mFilesInDir.get(i).getName())) {
+                                                    number++;
+                                                    suggestedName = inputName.concat("(" + String.valueOf(number) + ")");
+                                                    break;
+                                                }
+                                            }
+                                            if (suggestedName.equals(startLoopName)) {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                File newFile = new File(mSelectedDir.getAbsolutePath(), suggestedName);
+                                if (mFilesInDir.get(index).renameTo(newFile)) {
+                                    mFilesInDir.set(index, newFile);
+                                    successfulRenames++;
+                                }
+
+                                if (!isNewFile) {
+                                    if (!bufferedFilePath.equals("")) {
+                                        if (bufferedFilePath.equals(initialPath)) {
+                                            bufferedFilePath = mFilesInDir.get(index).getAbsolutePath();
+                                        }
+                                    } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+                                        for (int i = 0; i < bufferedFilesList.size(); i++) {
+                                            if (bufferedFilesList.get(i).equals(initialPath)) {
+                                                bufferedFilesList.set(i, mFilesInDir.get(index).getAbsolutePath());
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                        File newFile = new File(mSelectedDir.getAbsolutePath(), newName);
-                        Log.d(MainActivity.TAG, "path = " + mSelectedDir.getAbsolutePath());
-                        boolean renameSuccessful = displayedList.get(position).renameTo(newFile);
-                        if (renameSuccessful) {
+
+                        if (!isNewFile) {
+                            String message = "";
+                            if (successfulRenames == renameList.size()) {
+                                message = successfulRenames + "\u0020files have been successfully renamed";
+                            } else {
+                                message = (renameList.size() - successfulRenames) + "\u0020files have not been renamed";
+                            }
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                            if (successfulRenames > 0) {
+                                refreshLists(mSelectedDir);
+                            }
+                        } else {
                             refreshLists(mSelectedDir);
                         }
                     }
                 });
 
+        Log.d(MainActivity.TAG, "renameFile builder ready");
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface arg0) {
+                Log.d(MainActivity.TAG, "renameFile alert onShow");
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
                 alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getActivity().getResources().getColor(R.color.colorIcon2));
                 InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.toggleSoftInputFromWindow(inputEditText.getApplicationWindowToken(),
                         InputMethodManager.SHOW_FORCED, 0);
+                Log.d(MainActivity.TAG, "renameFile alert onShow end");
             }
         });
+        Log.d(MainActivity.TAG, "renameFile alert ready");
         alert.show();
+        Log.d(MainActivity.TAG, "renameFile alert shown");
     }
 
     private void setInitialDir() {
@@ -692,22 +932,63 @@ public class ManagerFragment extends Fragment {
         }
     }
 
-    private void getPath(int position) {
-        bufferedFilePath = displayedList.get(position).getAbsolutePath();
+    private ArrayList<Integer> bubbleSort(ArrayList<Integer> listToSort) {
+        for (int i = 0; i < listToSort.size(); i++) {
+            int min = listToSort.get(i);
+            int position = i;
+            int temp = 0;
+            for (int j = i; j < listToSort.size(); j++) {
+                if (min > listToSort.get(j)) {
+                    min = listToSort.get(j);
+                    position = j;
+                }
+            }
+            temp = listToSort.get(i);
+            listToSort.set(i, min);
+            listToSort.set(position, temp);
+        }
+        return listToSort;
     }
 
-    public boolean copyFileOrDirectory(String srcDir, String dstDir) {
-        Log.d(MainActivity.TAG, "copyFileOrDirectory :" + srcDir + " / " + dstDir);
+    private void getPath(int position) {
+        bufferedFilePath = displayedList.get(position).getAbsolutePath();
+        bufferedFilesIndexList.clear();
+        bufferedFilesList.clear();
+    }
+
+    private void getPaths(ArrayList<Integer> filesToBuffer) {
+        bufferedFilePath = "";
+        bufferedFilesIndexList = bubbleSort(filesToBuffer);
+        for (int i = 0; i < bufferedFilesIndexList.size(); i++) {
+            bufferedFilesList.add(displayedList.get(bufferedFilesIndexList.get(i)).getAbsolutePath());
+        }
+    }
+
+    public ArrayList<Integer> pasteFiles(ArrayList<String> srcFiles, String dstDir) {
+        Log.d(MainActivity.TAG, "pasteFiles, bufferdFiles = " + bufferedFilesList.size());
+        ArrayList<Integer> pastedFiles = new ArrayList<>();
+        for (int i = 0; i < srcFiles.size(); i++) {
+            if (pasteFile(srcFiles.get(i), dstDir)) {
+                pastedFiles.add(i);
+            }
+        }
+        return pastedFiles;
+    }
+
+    public boolean pasteFile(String srcDir, String dstDir) {
+        Log.d(MainActivity.TAG, "pasteFile :" + srcDir + " / " + dstDir);
         File src = new File(srcDir);
         File dstDirectory = new File(dstDir);
         File[] dstDirFiles = dstDirectory.listFiles();
+        String dstFileName = src.getName();
         for (int i = 0; i < dstDirFiles.length; i++) {
             if (dstDirFiles[i].getName().equals(src.getName())) {
-                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.such_name_exists), Toast.LENGTH_SHORT).show();
-                return false;
+/*                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.such_name_exists), Toast.LENGTH_SHORT).show();
+                return false;*/
+                dstFileName = silentRename(dstDir, dstFileName, src.isDirectory());
             }
         }
-        File dst = new File(dstDir, src.getName());
+        File dst = new File(dstDir, dstFileName);
         try {
             copyItem(src, dst);
         } catch (IOException e) {
@@ -716,7 +997,7 @@ public class ManagerFragment extends Fragment {
         return true;
     }
 
-    public void copyItem(File src, File dst) throws IOException{
+    public void copyItem(File src, File dst) throws IOException {
         if (src.isDirectory()) {
             if (!dst.exists()) {
                 dst.mkdir();
@@ -747,14 +1028,14 @@ public class ManagerFragment extends Fragment {
             }
             if (file.delete()) {
                 Log.d(MainActivity.TAG, "file Deleted :" + file.getAbsolutePath());
-                refreshLists(mSelectedDir);
+                //refreshLists(mSelectedDir);
             } else {
                 Log.d(MainActivity.TAG, "file not Deleted :" + file.getAbsolutePath());
             }
         } else {
             if (file.delete()) {
                 Log.d(MainActivity.TAG, "file Deleted :" + file.getAbsolutePath());
-                refreshLists(mSelectedDir);
+                //refreshLists(mSelectedDir);
             } else {
                 Log.d(MainActivity.TAG, "file not Deleted :" + file.getAbsolutePath());
             }
@@ -763,35 +1044,113 @@ public class ManagerFragment extends Fragment {
 
     //overloaded method
     public void deleteFile(String path, boolean showDialog) {
-        Log.d(MainActivity.TAG, "deleteFile");
+        Log.d(MainActivity.TAG, "deleteFile path");
         File file = new File(path);
-        if (file.exists()) {
-            if (showDialog) {
-                confirmDialog(file);
-            } else {
+        if (showDialog) {
+            ArrayList<File> filesToDelete = new ArrayList<>();
+            filesToDelete.add(file);
+            confirmDialog(filesToDelete);
+        } else {
+            if (file.exists()) {
                 recursiveDelete(file);
+                if (!bufferedFilePath.equals("")) {
+                    if (bufferedFilePath.equals(path)) {
+                        bufferedFilePath = "";
+                    }
+                } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+                    for (int i = 0; i < bufferedFilesList.size(); i++) {
+                        if (bufferedFilesList.get(i).equals(path)) {
+                            bufferedFilesList.remove(i);
+                        }
+                    }
+                }
+                Log.d(MainActivity.TAG, "bufferd files = " + bufferedFilesList.size());
             }
         }
+        refreshLists(mSelectedDir);
     }
 
     //overloaded method
     public void deleteFile(int position, boolean showDialog) {
-        Log.d(MainActivity.TAG, "deleteFile");
-
+        Log.d(MainActivity.TAG, "deleteFile position");
         File file = displayedList.get(position);
-        if (file.exists()) {
-            if (showDialog) {
-                confirmDialog(file);
-            } else {
+        if (showDialog) {
+            ArrayList<File> filesToDelete = new ArrayList<>();
+            filesToDelete.add(file);
+            confirmDialog(filesToDelete);
+        } else {
+            if (file.exists()) {
                 recursiveDelete(file);
+                if (!bufferedFilePath.equals("")) {
+                    if (bufferedFilePath.equals(displayedList.get(position).getAbsolutePath())) {
+                        bufferedFilePath = "";
+                    }
+                } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+                    for (int i = 0; i < bufferedFilesList.size(); i++) {
+                        if (bufferedFilesList.get(i).equals(displayedList.get(position).getAbsolutePath())) {
+                            bufferedFilesList.remove(i);
+                        }
+                    }
+                }
+                Log.d(MainActivity.TAG, "bufferd files = " + bufferedFilesList.size());
             }
+        }
+        refreshLists(mSelectedDir);
+    }
+
+    //overloaded method
+    public void deleteFiles(ArrayList<Integer> inputList, boolean showDialog) {
+        Log.d(MainActivity.TAG, "deleteFiles list int");
+        if (showDialog) {
+            ArrayList<File> filesToDelete = new ArrayList<>();
+            for (int i = 0; i < inputList.size(); i++) {
+                File file = mFilesInDir.get(inputList.get(i));
+                filesToDelete.add(file);
+            }
+            confirmDialog(filesToDelete);
+            checkedItems.clear();
         }
     }
 
-    private void confirmDialog(final File file) {
+    //overloaded method
+    public void deleteFiles(ArrayList<String> filesToDelete) {
+        Log.d(MainActivity.TAG, "deleteFiles list String");
+
+        for (int i = 0; i < filesToDelete.size(); i++) {
+            File file = new File(filesToDelete.get(i));
+            if (file.exists()) {
+                recursiveDelete(file);
+                if (!bufferedFilePath.equals("")) {
+                    if (bufferedFilePath.equals(file.getAbsolutePath())) {
+                        bufferedFilePath = "";
+                    }
+                } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+                    for (int j = 0; j < bufferedFilesList.size(); j++) {
+                        if (bufferedFilesList.get(j).equals(file.getAbsolutePath())) {
+                            bufferedFilesList.remove(j);
+                        }
+                    }
+
+                }
+                Log.d(MainActivity.TAG, "bufferd files = " + bufferedFilesList.size());
+            }
+        }
+        checkedItems.clear();
+        refreshLists(mSelectedDir);
+    }
+
+    private void confirmDialog(final ArrayList<File> filesToDelete) {
+        String message = "";
+
+        if (filesToDelete != null && filesToDelete.size() > 1) {
+            int number = filesToDelete.size();
+            message = getString(R.string.are_you_sure_multiple) + number + getString(R.string.are_you_sure_items);
+        } else {
+            message = getString(R.string.are_you_sure_single);
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme);
-        builder.setTitle(getActivity().getResources().getString(R.string.are_you_sure))
+        builder.setTitle(message)
                 .setCancelable(true)
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
@@ -802,7 +1161,23 @@ public class ManagerFragment extends Fragment {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        recursiveDelete(file);
+                        for (File file : filesToDelete) {
+                            if (file.exists()) {
+                                recursiveDelete(file);
+                                if (!bufferedFilePath.equals("")) {
+                                    if (bufferedFilePath.equals(file.getAbsolutePath())) {
+                                        bufferedFilePath = "";
+                                    }
+                                } else if (bufferedFilesList != null && bufferedFilesList.size() > 0) {
+                                    for (int i = 0; i < bufferedFilesList.size(); i++) {
+                                        if (bufferedFilesList.get(i).equals(file.getAbsolutePath())) {
+                                            bufferedFilesList.remove(i);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        refreshLists(mSelectedDir);
                         dialog.dismiss();
                     }
                 });
@@ -826,7 +1201,7 @@ public class ManagerFragment extends Fragment {
     }
 
     private void onFileClick(final File file) {
-        Log.d(MainActivity.TAG, "changeDirectory");
+        Log.d(MainActivity.TAG, "onFileClick");
         if (file == null) {
             debug("Could not change folder: dir was null");
         } else if (!file.isDirectory()) {
@@ -863,14 +1238,26 @@ public class ManagerFragment extends Fragment {
             String path1 = file.getAbsolutePath();
             String path2 = path1.replace("/", " > ");
             directoryTextView.setText(path2);
+            checkBoxState.clear();
             refreshLists(file);
             mSelectedDir = file;
         }
     }
 
+    private void refreshCheckBoxState(int numberFiles) {
+        if (checkBoxState.size() == 0) {
+            for (int i = 0; i < numberFiles; i++) {
+                checkBoxState.add(false);
+            }
+        }
+    }
+
     private void refreshLists(File file) {
+        Log.d(MainActivity.TAG, "refreshLists");
         searchString = "";
         final File[] contents = file.listFiles();
+        checkBoxState.clear();
+        refreshCheckBoxState(contents.length);
         if (contents != null) {
             int numDirectories = 0;
             for (final File f : contents) {

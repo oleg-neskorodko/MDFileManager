@@ -36,12 +36,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorBlack"
-            android:minHeight="?attr/actionBarSize">
+            android:minHeight="45dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
 
                 <TextView
                     android:id="@+id/nameEditorTextView"
@@ -55,8 +54,8 @@
 
                 <ImageView
                     android:id="@+id/saveEditorImageView"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@+id/findEditorImageView"
@@ -65,8 +64,8 @@
 
                 <ImageView
                     android:id="@+id/findEditorImageView"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:layout_alignParentRight="true"
                     android:layout_marginLeft="10dp"
                     android:tint="@color/colorWhite"

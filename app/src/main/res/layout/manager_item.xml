@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingRight="10dp"
         android:paddingLeft="5dp">
 
         <TextView
@@ -75,10 +74,12 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginLeft="5dp"
-            android:buttonTint="@color/colorGray3"
-            android:text="" />
+            android:paddingRight="10dp"
+            android:paddingBottom="20dp"
+            android:gravity="top"
+            android:buttonTint="@color/colorGray3"/>
 
     </RelativeLayout>
 

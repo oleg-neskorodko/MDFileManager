@@ -35,7 +35,9 @@
     <string name="no_folder_created">No folder has been created</string>
     <string name="no_file_created">No file has been created</string>
     <string name="insert_new_name">Insert the new name:</string>
-    <string name="are_you_sure">Are you sure you want to delete this?</string>
+    <string name="are_you_sure_single">Are you sure you want to delete this object?</string>
+    <string name="are_you_sure_multiple">Are you sure you want to delete\u0020</string>
+    <string name="are_you_sure_items">\u0020objects?</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="return_button">RETURN</string>
@@ -60,5 +62,7 @@
     <string name="info_rate_button">Rate the app</string>
     <string name="info_offers">We are open to collaboration! If you have any ideas or offers please feel free to contact us:</string>
     <string name="info_contacts">E-mail:</string>
+    <string name="no_file_to_paste">no file to paste</string>
+    <string name="select_dst_folder">please select destination folder</string>
 
 </resources>

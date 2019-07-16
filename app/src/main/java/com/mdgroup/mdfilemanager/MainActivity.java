@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.Space;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements FragmentInteractionListener {
@@ -143,9 +144,11 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         int screenWidth = displayMetrics.widthPixels;
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) pasteMainImageView.getLayoutParams();
         int iconWidth = pasteMainImageView.getLayoutParams().width + 2 * lp.rightMargin;
+        LinearLayout.LayoutParams lpToolbar = (LinearLayout.LayoutParams) toolbarTop.getLayoutParams();
+        int toolbarMargins = lpToolbar.rightMargin + lpToolbar.leftMargin;
         Log.d(TAG, "MainActivity iconWidth = " + iconWidth + " , screen = " + screenWidth);
 
-        int iconNumber = (screenWidth - screenWidth % iconWidth) / iconWidth;
+        int iconNumber = (screenWidth - 10 - toolbarMargins - screenWidth % iconWidth) / iconWidth;
         if (iconNumber < toolbarIcon.length) {
             overflowMenuNames = new String[menuNames.length - iconNumber];
             overflowMenuIndex = new int[menuIndexes.length - iconNumber];
