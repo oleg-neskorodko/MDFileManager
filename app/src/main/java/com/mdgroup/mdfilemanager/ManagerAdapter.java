@@ -2,8 +2,6 @@ package com.mdgroup.mdfilemanager;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +10,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.io.File;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
@@ -94,8 +95,6 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     public void onBindViewHolder(final ManagerAdapter.ViewHolder holder, final int position) {
         //Log.d(MainActivity.TAG, "onBindViewHolder post size = " + checkBoxState.get(position));
 
-        //TODO fix bugs !!!
-        //in some cases, it will prevent unwanted situations
         holder.itemCheckBox.setOnCheckedChangeListener(null);
         holder.itemCheckBox.setChecked(checkBoxState.get(position));
         if (checkBoxState.get(position)) {
@@ -103,11 +102,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         } else {
             holder.itemCheckBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorGray3)));
         }
-/*        String str = new String("");
-        for (int i = 0; i < checkBoxState.size(); i++) {
-            str += checkBoxState.get(i).toString();
-        }
-        Log.d(MainActivity.TAG, "checkBoxState  = " + str);*/
+
         holder.itemCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -129,6 +124,12 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
 
         double size = (double) getFileSize(objects.get(position));
         //Log.d(MainActivity.TAG, "size = " + size);
+        holder.discSpaceTextView.setText(setSizeString(size));
+        holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(selectPicture(position)));
+    }
+
+    private String setSizeString(double size) {
+        String output;
         if (size >= 0) {
             String measure = context.getString(R.string.bytes);
             if (size >= 1024) {
@@ -144,28 +145,37 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
                 }
             }
             if (size < 10) {
-                holder.discSpaceTextView.setText(decimalFormat1.format(size) + " " + measure);
+                output = decimalFormat1.format(size) + " " + measure;
             } else {
-                holder.discSpaceTextView.setText(decimalFormat2.format(size) + " " + measure);
+                output = decimalFormat2.format(size) + " " + measure;
             }
-        } else holder.discSpaceTextView.setText("");
+        } else output = "";
+        return output;
+    }
 
-
+    private int selectPicture(int position) {
+        int[] pictureList = new int[] {
+                R.drawable.folder,
+                R.drawable.image,
+                R.drawable.video_player,
+                R.drawable.music,
+                R.drawable.text,
+                R.drawable.file
+        };
         if (objects.get(position).isDirectory()) {
-            holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.folder));
+            return pictureList[0];
         } else {
             String mimeType = checkFileType(objects.get(position).getAbsolutePath());
-            //Log.d(MainActivity.TAG, "mimeType = " + str);
             if (mimeType.startsWith("image")) {
-                holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.image));
+                return pictureList[1];
             } else if (mimeType.startsWith("video")) {
-                holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.video_player));
+                return pictureList[2];
             } else if (mimeType.startsWith("audio")) {
-                holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.music));
+                return pictureList[3];
             } else if (mimeType.startsWith("text")) {
-                holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.text));
+                return pictureList[4];
             } else {
-                holder.pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.file));
+                return pictureList[5];
             }
         }
     }

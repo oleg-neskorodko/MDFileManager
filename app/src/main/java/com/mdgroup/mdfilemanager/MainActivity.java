@@ -4,9 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -15,8 +12,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
-import android.widget.Space;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 
 public class MainActivity extends AppCompatActivity implements FragmentInteractionListener {
 
@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     private TextView nameMainTextView;
     private TextView versionMainTextView;
     private ImageView[] toolbarIcon;
+    private ImageView[] displayedToolbarIcon;
     private String[] menuNames;
     private String[] overflowMenuNames;
     private int[] menuIndexes;
@@ -53,8 +54,38 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         menuIndexes = new int[]{0, 1, 2, 3, 4, 5};
         pasteIconShown = false;
 
-        toolbarTop = (Toolbar) findViewById(R.id.mainToolbar);
+        initViews();
+        setSearchView();
+        fillIconList();
 
+        Drawable source = getResources().getDrawable(R.drawable.overflow_menu);
+        Bitmap bitmap = ((BitmapDrawable) source).getBitmap();
+        Drawable drawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 50, 50, true));
+        drawable.setTint(getResources().getColor(R.color.colorWhite));
+        toolbarTop.setOverflowIcon(drawable);
+        pasteMainImageView.setVisibility(View.INVISIBLE);
+        mainSearchView.setVisibility(View.GONE);
+        nameMainTextView.setVisibility(View.GONE);
+        versionMainTextView.setVisibility(View.GONE);
+
+        setSupportActionBar(toolbarTop);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        managerFragment = new ManagerFragment();
+        managerFragment.setListener(this);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, managerFragment, "manager_fragment").addToBackStack("manager_fragment").commit();
+        } else {
+            ManagerFragment fragment = (ManagerFragment) getSupportFragmentManager().findFragmentByTag("manager_fragment");
+            if (fragment != null) {
+                fragment.setListener(this);
+            }
+        }
+        Log.d(TAG, "MainActivity onCreate end");
+    }
+
+    private void initViews() {
+        toolbarTop = (Toolbar) findViewById(R.id.mainToolbar);
         mainSearchView = toolbarTop.findViewById(R.id.mainSearchView);
         pasteMainImageView = toolbarTop.findViewById(R.id.pasteMainImageView);
         sortMainImageView = toolbarTop.findViewById(R.id.sortMainImageView);
@@ -111,7 +142,9 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
         for (int i = 0; i < toolbarIcon.length; i++) {
             toolbarIcon[i].setOnClickListener(menuClickListener);
         }
+    }
 
+    private void setSearchView() {
         mainSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -138,7 +171,9 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                 return false;
             }
         });
+    }
 
+    private void fillIconList() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
@@ -150,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
 
         int iconNumber = (screenWidth - 10 - toolbarMargins - screenWidth % iconWidth) / iconWidth;
         if (iconNumber < toolbarIcon.length) {
+            displayedToolbarIcon = new ImageView[iconNumber];
             overflowMenuNames = new String[menuNames.length - iconNumber];
             overflowMenuIndex = new int[menuIndexes.length - iconNumber];
             for (int i = iconNumber; i < toolbarIcon.length; i++) {
@@ -157,37 +193,17 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
                 overflowMenuNames[i - iconNumber] = menuNames[i];
                 overflowMenuIndex[i - iconNumber] = menuIndexes[i];
             }
-        }
-
-        Drawable source = getResources().getDrawable(R.drawable.overflow_menu);
-        Bitmap bitmap = ((BitmapDrawable) source).getBitmap();
-        Drawable drawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 50, 50, true));
-        drawable.setTint(getResources().getColor(R.color.colorWhite));
-        toolbarTop.setOverflowIcon(drawable);
-        pasteMainImageView.setVisibility(View.INVISIBLE);
-        mainSearchView.setVisibility(View.GONE);
-        nameMainTextView.setVisibility(View.GONE);
-        versionMainTextView.setVisibility(View.GONE);
-
-        setSupportActionBar(toolbarTop);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        managerFragment = new ManagerFragment();
-        managerFragment.setListener(this);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, managerFragment, "manager_fragment").addToBackStack("manager_fragment").commit();
         } else {
-            ManagerFragment fragment = (ManagerFragment) getSupportFragmentManager().findFragmentByTag("manager_fragment");
-            if (fragment != null) {
-                fragment.setListener(this);
-            }
+            displayedToolbarIcon = new ImageView[toolbarIcon.length];
         }
-        Log.d(TAG, "MainActivity onCreate end");
+        for (int i = 0; i < displayedToolbarIcon.length; i++) {
+            displayedToolbarIcon[i] = toolbarIcon[i];
+        }
     }
 
     private void showHideSearch(int buttonsState, int searchState, boolean itemsVisible) {
-        for (int i = 0; i < toolbarIcon.length; i++) {
-            toolbarIcon[i].setVisibility(buttonsState);
+        for (int i = 0; i < displayedToolbarIcon.length; i++) {
+            displayedToolbarIcon[i].setVisibility(buttonsState);
         }
         if (menuItems != null) {
             for (int i = 0; i < menuItems.length; i++) {
@@ -204,8 +220,8 @@ public class MainActivity extends AppCompatActivity implements FragmentInteracti
     }
 
     private void showHideInfoToolbar(int buttonsState, int textState, boolean itemsVisible) {
-        for (int i = 0; i < toolbarIcon.length; i++) {
-            toolbarIcon[i].setVisibility(buttonsState);
+        for (int i = 0; i < displayedToolbarIcon.length; i++) {
+            displayedToolbarIcon[i].setVisibility(buttonsState);
         }
         if (menuItems != null) {
             for (int i = 0; i < menuItems.length; i++) {

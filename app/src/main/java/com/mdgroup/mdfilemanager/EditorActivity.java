@@ -5,10 +5,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
@@ -20,6 +16,12 @@ import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.res.ResourcesCompat;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -272,7 +274,7 @@ public class EditorActivity extends AppCompatActivity {
             Log.d(MainActivity.TAG, "File write failed: " + e.toString());
         }
         initialText = text;
-        Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getResources().getString(R.string.saved), Toast.LENGTH_SHORT).show();
     }
 
     @Override

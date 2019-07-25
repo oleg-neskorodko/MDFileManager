@@ -79,6 +79,35 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/shareAboutTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="left"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/info_share"
+        style="@style/MainText"/>
+
+    <Button
+        android:id="@+id/shareAboutButton"
+        android:typeface="monospace"
+        android:textStyle="bold"
+        android:textColor="@color/colorIcon2"
+        android:background="@drawable/my_button"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/info_share_button"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="15dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/offersAboutTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -26,7 +26,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp" />
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/editorToolbar"
             android:layout_weight="1"
             android:paddingTop="5dp"
@@ -111,7 +111,7 @@
 
                 </LinearLayout>
             </RelativeLayout>
-        </android.support.v7.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
 
     </LinearLayout>
 

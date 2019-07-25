@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fallout File Manager</string>
+    <string name="toolbar_name">Fallout File Manager</string>
+    <string name="info_name">Fallout File Manager</string>
+    <string name="market_link">market://details?id=</string>
+    <string name="web_link">http://play.google.com/store/apps/details?id=</string>
+    <string name="remote_access">Удаленный доступ</string>
+    <string name="upload">Выгрузить</string>
+    <string name="cancel">Отмена</string>
+    <string name="search">Найти</string>
+    <string name="sort">Сортировать</string>
+    <string name="copy">Копировать</string>
+    <string name="cut">Вырезать</string>
+    <string name="paste">Вставить</string>
+    <string name="delete">Удалить</string>
+    <string name="choose">ВЫБЕРИТЕ ДЕЙСТВИЕ:</string>
+    <string name="sort_list">СОРТИРОВАТЬ:</string>
+    <string name="old_new">от старых к новым</string>
+    <string name="new_old">от новых к старым</string>
+    <string name="a_z">от А до Я</string>
+    <string name="z_a">от Я до А</string>
+    <string name="info">Информация</string>
+    <string name="rename">Переименовать</string>
+    <string name="ok">OK</string>
+    <string name="bytes">B</string>
+    <string name="kilobytes">KB</string>
+    <string name="megabytes">MB</string>
+    <string name="gigabytes">GB</string>
+    <string name="empty_word">пусто</string>
+    <string name="new_file">Новый файл</string>
+    <string name="new_folder">Новая папка</string>
+    <string name="settings">Настройки</string>
+    <string name="new_folder_name">New_folder</string>
+    <string name="new_file_name">New_file</string>
+    <string name="no_folder_created">Папка не была создана</string>
+    <string name="no_file_created">Файл не был создан</string>
+    <string name="insert_new_name">Введите новое имя:</string>
+    <string name="are_you_sure_single">Вы действительно хотите удалить этот объект?</string>
+    <string name="are_you_sure_multiple">Вы действительно хотите удалить\u0020</string>
+    <string name="are_you_sure_items">\u0020объектов?</string>
+    <string name="yes">ДА</string>
+    <string name="no">НЕТ</string>
+    <string name="return_button">НАЗАД</string>
+    <string name="saving_changes">Желаете ли сохранить изменения?</string>
+    <string name="name_exists">Введенное вами название уже существует</string>
+    <string name="such_name_exists">Файл/папка с таким названием уже существует</string>
+    <string name="small_large">от меньших к большим</string>
+    <string name="large_small">от больших к меньшим</string>
+    <string-array name="menu_items">
+        <item>Вставить</item>
+        <item>Сортировать</item>
+        <item>Найти</item>
+        <item>Новая папка</item>
+        <item>Новый файл</item>
+        <item>Информация</item>
+    </string-array>
+    <string name="info_thanks">Спасибо за использование нашего приложения!</string>
+    <string name="info_about_us">Мы - MD Group - команда мобильных разработчиков с широким спектром компетенций.
+        Мы обожаем воплощать идеи в реальность. Вот почему мы всегда открыты для чего-то нового.</string>
+    <string name="info_rate">Ваш отзыв о нашем приложении очень поможет сделать его лучше!</string>
+    <string name="info_rate_button">ОЦЕНИТЬ</string>
+    <string name="info_offers">Мы открыты для сотрудничества! Если у вас есть идеи или предложения, пожалуйста, свяжитесь с нами.</string>
+    <string name="info_contacts">E-mail: md101110group@gmail.com</string>
+    <string name="no_file_to_paste">Не выбран файл для вставки</string>
+    <string name="select_dst_folder">Пожалуйста, выберите папку для вставки</string>
+    <string name="info_share">А не заинтересует ли это приложение кого-то из ваших знакомых?</string>
+    <string name="info_share_button">ПОДЕЛИТЬСЯ</string>
+    <string name="saved">Сохранено</string>
+    <string name="share_via">Поделиться через:</string>
+</resources>

@@ -4,14 +4,14 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 
+import androidx.fragment.app.Fragment;
 
 
 public class AboutFragment extends Fragment {
@@ -19,16 +19,39 @@ public class AboutFragment extends Fragment {
     private String marketLink;
     private String webLink;
     private Button rateAboutButton;
+    private Button shareAboutButton;
+    private int rateButtonWidth;
+    private int shareButtonWidth;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.about_layout, null);
 
         marketLink = getActivity().getResources().getString(R.string.market_link);
         webLink = getActivity().getResources().getString(R.string.web_link);
 
         rateAboutButton = v.findViewById(R.id.rateAboutButton);
+        shareAboutButton = v.findViewById(R.id.shareAboutButton);
+
+        ViewTreeObserver observer = rateAboutButton.getViewTreeObserver();
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                rateAboutButton.getViewTreeObserver().removeOnPreDrawListener(this);
+                rateButtonWidth = rateAboutButton.getMeasuredWidth();
+                return true;
+            }
+        });
+
+        observer = shareAboutButton.getViewTreeObserver();
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                shareAboutButton.getViewTreeObserver().removeOnPreDrawListener(this);
+                shareButtonWidth = shareAboutButton.getMeasuredWidth();
+                levelButtons();
+                return true;
+            }
+        });
+
         rateAboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -45,6 +68,28 @@ public class AboutFragment extends Fragment {
                 }
             }
         });
+
+        shareAboutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                String message = webLink + getActivity().getPackageName();
+                sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_via)));
+            }
+        });
+
         return v;
+    }
+
+    private void levelButtons() {
+        Log.d(MainActivity.TAG, "levelButtons");
+        if (shareButtonWidth > rateButtonWidth) {
+            rateAboutButton.setWidth(shareButtonWidth);
+        } else {
+            shareAboutButton.setWidth(rateButtonWidth);
+        }
     }
 }

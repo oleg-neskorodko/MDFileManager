@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "576590726941",
+    "firebase_url": "https://fallout-file-manager.firebaseio.com",
+    "project_id": "fallout-file-manager",
+    "storage_bucket": "fallout-file-manager.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576590726941:android:4a595a2785d2f7f8",
+        "android_client_info": {
+          "package_name": "com.mdgroup.mdfilemanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "576590726941-giml0fv7u1gourqle5copngqtnr05bqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3Wsxc7fEzOcQRM4iQCRpMqSAEvq8DpTg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "576590726941-giml0fv7u1gourqle5copngqtnr05bqq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
