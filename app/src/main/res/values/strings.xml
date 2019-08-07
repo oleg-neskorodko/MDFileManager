@@ -2,7 +2,7 @@
     <string name="app_name">Fallout File Manager</string>
     <string name="toolbar_name">Fallout File Manager</string>
     <string name="info_name">Fallout File Manager</string>
-    <string name="info_version">v.1.0</string>
+    <string name="info_version">v.1.1</string>
     <string name="market_link">market://details?id=</string>
     <string name="web_link">http://play.google.com/store/apps/details?id=</string>
     <string name="remote_access">Remote access</string>

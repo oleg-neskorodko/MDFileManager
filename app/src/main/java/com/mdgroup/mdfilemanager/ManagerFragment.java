@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,9 +71,7 @@ public class ManagerFragment extends Fragment {
     private String[] dialogItems;
     private String[] sortDialogItems;
     private String bufferedFilePath;
-    private SimpleDateFormat sdf1 = new SimpleDateFormat("dd.MM.yyyy HH:mm");
     private int sortWay;
-    private String searchString;
 
     public void setListener(FragmentInteractionListener listener) {
         this.listener = listener;
@@ -113,7 +110,7 @@ public class ManagerFragment extends Fragment {
 
         listener.setCurrentDirectory();
 
-        directoryTextView = (TextView) v.findViewById(R.id.directoryTextView);
+        directoryTextView = v.findViewById(R.id.directoryTextView);
         longPressed = false;
         cutFile = false;
         bufferedFilePath = "";
@@ -122,7 +119,7 @@ public class ManagerFragment extends Fragment {
 
         mListDirectoriesAdapter = new ManagerAdapter(getActivity(), displayedList, checkBoxState);
         layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView = v.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         recyclerView.setAdapter(mListDirectoriesAdapter);
@@ -209,8 +206,9 @@ public class ManagerFragment extends Fragment {
 
     public void filterList(String string) {
         //Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
-        filteredList.clear();
-        searchString = string;
+        if (filteredList != null) {
+            filteredList.clear();
+        }
         if (string.equals("")) {
             displayedList.clear();
             displayedList.addAll(mFilesInDir);
@@ -231,7 +229,6 @@ public class ManagerFragment extends Fragment {
     public void unfilterList() {
         displayedList.clear();
         displayedList.addAll(mFilesInDir);
-        searchString = "";
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 
@@ -945,8 +942,6 @@ public class ManagerFragment extends Fragment {
         String dstFileName = src.getName();
         for (int i = 0; i < dstDirFiles.length; i++) {
             if (dstDirFiles[i].getName().equals(src.getName())) {
-/*                Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.such_name_exists), Toast.LENGTH_SHORT).show();
-                return false;*/
                 dstFileName = silentRename(dstDir, dstFileName, src.isDirectory());
             }
         }
@@ -1212,7 +1207,6 @@ public class ManagerFragment extends Fragment {
 
     private void refreshLists(File file) {
         Log.d(MainActivity.TAG, "refreshLists");
-        searchString = "";
         final File[] contents = file.listFiles();
         checkBoxState.clear();
         refreshCheckBoxState(contents.length);
@@ -1243,7 +1237,6 @@ public class ManagerFragment extends Fragment {
                 setInitialDir();
                 onFileClick(initialDir);
             }
-            //TODO
         }
     }
 
@@ -1261,23 +1254,6 @@ public class ManagerFragment extends Fragment {
         requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 MY_PERMISSIONS_REQUEST);
     }
-
-/*    public void requestPermissionWithRationale(View view) {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            final String message = "Storage permission is needed to show files";
-            Snackbar.make(view, message, Snackbar.LENGTH_LONG)
-                    .setAction("GRANT", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            requestPerms();
-                        }
-                    })
-                    .show();
-        } else {
-            requestPerms();
-        }
-    }*/
 
     public class SimpleDividerItemDecoration extends RecyclerView.ItemDecoration {
         private Drawable mDivider;

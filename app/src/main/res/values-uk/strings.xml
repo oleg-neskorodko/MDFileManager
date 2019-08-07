@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fallout File Manager</string>
+    <string name="toolbar_name">Fallout File Manager</string>
+    <string name="info_name">Fallout File Manager</string>
+    <string name="market_link">market://details?id=</string>
+    <string name="web_link">http://play.google.com/store/apps/details?id=</string>
+    <string name="remote_access">Віддалений доступ</string>
+    <string name="upload">Вивантажити</string>
+    <string name="cancel">Відмінити</string>
+    <string name="search">Знайти</string>
+    <string name="sort">Сортувати</string>
+    <string name="copy">Копіювати</string>
+    <string name="cut">Вирізати</string>
+    <string name="paste">Вставити</string>
+    <string name="delete">Видалити</string>
+    <string name="choose">ОБЕРІТЬ ДІЮ:</string>
+    <string name="sort_list">СОРТУВАТИ:</string>
+    <string name="old_new">від старих до нових</string>
+    <string name="new_old">від нових до старих</string>
+    <string name="a_z">від А до Я</string>
+    <string name="z_a">від Я до А</string>
+    <string name="info">Інформація</string>
+    <string name="rename">Перейменувати</string>
+    <string name="ok">OK</string>
+    <string name="bytes">B</string>
+    <string name="kilobytes">KB</string>
+    <string name="megabytes">MB</string>
+    <string name="gigabytes">GB</string>
+    <string name="empty_word">порожньо</string>
+    <string name="new_file">Новий файл</string>
+    <string name="new_folder">Нова папка</string>
+    <string name="settings">Налаштування</string>
+    <string name="new_folder_name">New_folder</string>
+    <string name="new_file_name">New_file</string>
+    <string name="no_folder_created">Папку не було створено</string>
+    <string name="no_file_created">Файл не був створений</string>
+    <string name="insert_new_name">Введіть нове ім\'я:</string>
+    <string name="are_you_sure_single">Чи ви дійсно бажаєте видалити цей об\'єкт?</string>
+    <string name="are_you_sure_multiple">Чи ви дійсно бажаєте видалити\u0020</string>
+    <string name="are_you_sure_items">\u0020об\'єктів?</string>
+    <string name="yes">ТАК</string>
+    <string name="no">НІ</string>
+    <string name="return_button">НАЗАД</string>
+    <string name="saving_changes">Чи бажаєте зберегти зміни?</string>
+    <string name="name_exists">Введене вами ім\'я вже існує</string>
+    <string name="such_name_exists">Файл/папка з таким ім\'ям вже існує</string>
+    <string name="small_large">від менших до більших</string>
+    <string name="large_small">від більших до менших</string>
+    <string-array name="menu_items">
+        <item>Вставити</item>
+        <item>Сортувати</item>
+        <item>Знайти</item>
+        <item>Нова папка</item>
+        <item>Новий файл</item>
+        <item>Інформація</item>
+    </string-array>
+    <string name="info_thanks">Дякуємо за використання нашого додатку!</string>
+    <string name="info_about_us">Ми - MD Group - команда мобільных розробників з широким спектром компетенцій.
+        Ми обожнюємо втілювати ідеї в реальність. Ось чому ми завжди відкриті до чогось нового.</string>
+    <string name="info_rate">Ваш відгук про наш додаток дуже допоможе зробити його краще!</string>
+    <string name="info_rate_button">ОЦІНИТИ</string>
+    <string name="info_offers">Ми відкриті до співпраці! Якщо ви маєте ідеї або пропозиції, будь ласка, зв\'яжіться з нами.</string>
+    <string name="info_contacts">E-mail: md101110group@gmail.com</string>
+    <string name="no_file_to_paste">Не обрано файл для вставки</string>
+    <string name="select_dst_folder">Будь ласка, оберіть папку для вставки</string>
+    <string name="info_share">А чи не зацікавить цей додаток когось з ваших знайомих?</string>
+    <string name="info_share_button">ПОДІЛИТИСЯ</string>
+    <string name="saved">Збережено</string>
+    <string name="share_via">Поділитися через:</string>
+</resources>
