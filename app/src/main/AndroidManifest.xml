@@ -15,8 +15,7 @@
         android:theme="@style/Theme.Transparent">
         <activity
             android:name=".EditorActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden">
-        </activity>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -29,7 +28,9 @@
         </provider>
 
         <activity
-            android:name=".MainActivity">
+            android:name=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
