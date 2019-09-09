@@ -24,7 +24,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
 
     private View.OnClickListener clickListener;
     private View.OnLongClickListener longClickListener;
-    //private CompoundButton.OnCheckedChangeListener checkBoxListener;
+    private EventListener eventListener;
     private CheckBoxListener checkBoxListener;
     private ArrayList<File> objects;
     private ArrayList<Boolean> checkBoxState;
@@ -40,7 +40,9 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
         this.checkBoxState = checkBoxState;
     }
 
-
+    public void setEventListener(EventListener eventListener) {
+        this.eventListener = eventListener;
+    }
 
     public void setClickListener(View.OnClickListener callback) {
         clickListener = callback;
@@ -73,7 +75,9 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
                 parent, false);
 
         ManagerAdapter.ViewHolder holder = new ManagerAdapter.ViewHolder(v);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+
+/*        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 clickListener.onClick(view);
@@ -86,7 +90,7 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
                 longClickListener.onLongClick(v);
                 return false;
             }
-        });
+        });*/
 
         return holder;
     }
@@ -94,6 +98,23 @@ public class ManagerAdapter extends RecyclerView.Adapter<ManagerAdapter.ViewHold
     @Override
     public void onBindViewHolder(final ManagerAdapter.ViewHolder holder, final int position) {
         //Log.d(MainActivity.TAG, "onBindViewHolder post size = " + checkBoxState.get(position));
+
+        holder.itemView.setOnClickListener(null);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                eventListener.clickEvent(position);
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(null);
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                eventListener.longClickEvent(position);
+                return false;
+            }
+        });
 
         holder.itemCheckBox.setOnCheckedChangeListener(null);
         holder.itemCheckBox.setChecked(checkBoxState.get(position));

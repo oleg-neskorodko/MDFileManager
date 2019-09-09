@@ -161,13 +161,34 @@ public class ManagerFragment extends Fragment {
     }
 
     private void setListeners() {
-        mListDirectoriesAdapter.setClickListener(new View.OnClickListener() {
+        mListDirectoriesAdapter.setEventListener(new EventListener() {
+            @Override
+            public void longClickEvent(int position) {
+                //Log.d(MainActivity.TAG, "onLongClick position = " + position);
+                if (hasPermissions()) {
+                    makeOptionsDialog(position);
+                }
+            }
+
+            @Override
+            public void clickEvent(int position) {
+                if (!longPressed) {
+                    Log.d(MainActivity.TAG, "onClick position = " + position);
+                    if (hasPermissions()) {
+                        onFileClick(displayedList.get(position).getAbsoluteFile());
+                    }
+                } else longPressed = false;
+            }
+        });
+
+/*        mListDirectoriesAdapter.setClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!longPressed) {
                     int position = recyclerView.getChildAdapterPosition(v);
                     Log.d(MainActivity.TAG, "onClick position = " + position);
                     if (hasPermissions()) {
+                        Log.d(MainActivity.TAG, "position = " + position);
                         onFileClick(displayedList.get(position).getAbsoluteFile());
                     }
                 } else longPressed = false;
@@ -184,7 +205,7 @@ public class ManagerFragment extends Fragment {
                 }
                 return false;
             }
-        });
+        });*/
 
         mListDirectoriesAdapter.setCheckBoxListener(new CheckBoxListener() {
             @Override
@@ -206,11 +227,13 @@ public class ManagerFragment extends Fragment {
 
     public void filterList(String string) {
         //Log.d(MainActivity.TAG, "ExplorerFragment filterList = " + string);
-        if (filteredList != null) {
+        if (filteredList != null && filteredList.size() > 0) {
             filteredList.clear();
         }
         if (string.equals("")) {
-            displayedList.clear();
+            if (displayedList != null && displayedList.size() > 0) {
+                displayedList.clear();
+            }
             displayedList.addAll(mFilesInDir);
             recyclerView.getAdapter().notifyDataSetChanged();
         } else if (mFilesInDir.size() > 0) {

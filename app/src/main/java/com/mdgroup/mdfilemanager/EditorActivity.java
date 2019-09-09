@@ -60,100 +60,106 @@ public class EditorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(MainActivity.TAG, "EditorActivity onCreate");
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_editor);
 
         uriString = getIntent().getStringExtra("uri");
-        uri = Uri.parse(uriString);
-        file = new File(uriString);
-        indexes = new ArrayList<>();
-        editorToolbar = findViewById(R.id.editorToolbar);
-        editorEditText = findViewById(R.id.editorEditText);
 
-        nameEditorTextView = editorToolbar.findViewById(R.id.nameEditorTextView);
-        saveEditorImageView = editorToolbar.findViewById(R.id.saveEditorImageView);
-        findEditorImageView = editorToolbar.findViewById(R.id.findEditorImageView);
-        editorSearchView = editorToolbar.findViewById(R.id.editorSearchView);
-        backEditorTextView = editorToolbar.findViewById(R.id.backEditorTextView);
-        forwardEditorTextView = editorToolbar.findViewById(R.id.forwardEditorTextView);
-        foundEditorTextView = editorToolbar.findViewById(R.id.foundEditorTextView);
-        findEditorLayout = editorToolbar.findViewById(R.id.findEditorLayout);
+        if (uriString != null) {
+            uri = Uri.parse(uriString);
+            file = new File(uriString);
+            indexes = new ArrayList<>();
+            editorToolbar = findViewById(R.id.editorToolbar);
+            editorEditText = findViewById(R.id.editorEditText);
 
-        Typeface customFont = ResourcesCompat.getFont(this, R.font.symbola);
-        backEditorTextView.setTypeface(customFont);
-        backEditorTextView.setText("\uD83E\uDC60");
-        forwardEditorTextView.setTypeface(customFont);
-        forwardEditorTextView.setText("\uD83E\uDC62");
+            nameEditorTextView = editorToolbar.findViewById(R.id.nameEditorTextView);
+            saveEditorImageView = editorToolbar.findViewById(R.id.saveEditorImageView);
+            findEditorImageView = editorToolbar.findViewById(R.id.findEditorImageView);
+            editorSearchView = editorToolbar.findViewById(R.id.editorSearchView);
+            backEditorTextView = editorToolbar.findViewById(R.id.backEditorTextView);
+            forwardEditorTextView = editorToolbar.findViewById(R.id.forwardEditorTextView);
+            foundEditorTextView = editorToolbar.findViewById(R.id.foundEditorTextView);
+            findEditorLayout = editorToolbar.findViewById(R.id.findEditorLayout);
 
-        findEditorLayout.setVisibility(View.GONE);
+            Typeface customFont = ResourcesCompat.getFont(this, R.font.symbola);
+            backEditorTextView.setTypeface(customFont);
+            backEditorTextView.setText("\uD83E\uDC60");
+            forwardEditorTextView.setTypeface(customFont);
+            forwardEditorTextView.setText("\uD83E\uDC62");
 
-        nameEditorTextView.setText(file.getName());
+            findEditorLayout.setVisibility(View.GONE);
 
-        View.OnClickListener clickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.saveEditorImageView:
-                        saveDocument();
-                        break;
-                    case R.id.findEditorImageView:
-                        showSearchToolbar();
-                        break;
-                    case R.id.backEditorTextView:
-                        moveSelection(-1);
-                        break;
-                    case R.id.forwardEditorTextView:
-                        moveSelection(1);
-                        break;
+            nameEditorTextView.setText(file.getName());
+
+            View.OnClickListener clickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    switch (v.getId()) {
+                        case R.id.saveEditorImageView:
+                            saveDocument();
+                            break;
+                        case R.id.findEditorImageView:
+                            showSearchToolbar();
+                            break;
+                        case R.id.backEditorTextView:
+                            moveSelection(-1);
+                            break;
+                        case R.id.forwardEditorTextView:
+                            moveSelection(1);
+                            break;
+                    }
                 }
+            };
+
+            saveEditorImageView.setOnClickListener(clickListener);
+            findEditorImageView.setOnClickListener(clickListener);
+            backEditorTextView.setOnClickListener(clickListener);
+            forwardEditorTextView.setOnClickListener(clickListener);
+
+            editorSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    searchText = newText.toLowerCase();
+                    findText(1);
+                    return false;
+                }
+            });
+
+            editorSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    hideSearchToolbar();
+                    return false;
+                }
+            });
+
+            setSupportActionBar(editorToolbar);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+            StringBuilder text = new StringBuilder();
+            try {
+                final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charsetName));
+                String line;
+
+                while ((line = br.readLine()) != null) {
+                    text.append(line);
+                    text.append('\n');
+                }
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        };
-
-        saveEditorImageView.setOnClickListener(clickListener);
-        findEditorImageView.setOnClickListener(clickListener);
-        backEditorTextView.setOnClickListener(clickListener);
-        forwardEditorTextView.setOnClickListener(clickListener);
-
-        editorSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                searchText = newText.toLowerCase();
-                findText(1);
-                return false;
-            }
-        });
-
-        editorSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                hideSearchToolbar();
-                return false;
-            }
-        });
-
-        setSupportActionBar(editorToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        StringBuilder text = new StringBuilder();
-        try {
-            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charsetName));
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
-            }
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            initialText = text.toString();
+            editorEditText.setText(initialText);
+        } else {
+            Toast.makeText(this, "Unable to open this file", Toast.LENGTH_SHORT).show();
+            // finish() not working
+            finish();
         }
-        initialText = text.toString();
-        editorEditText.setText(initialText);
     }
 
     private void moveSelection(int step) {

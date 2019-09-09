@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Fallout File Manager</string>
-    <string name="toolbar_name">Fallout File Manager</string>
-    <string name="info_name">Fallout File Manager</string>
+    <string name="app_name">Saturn File Manager</string>
+    <string name="toolbar_name">Saturn File Manager</string>
+    <string name="info_name">Saturn File Manager</string>
     <string name="market_link">market://details?id=</string>
     <string name="web_link">http://play.google.com/store/apps/details?id=</string>
     <string name="remote_access">Удаленный доступ</string>
